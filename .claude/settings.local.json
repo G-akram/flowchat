@@ -12,7 +12,8 @@
       "Bash(find /d/projects/flowchat -type d -not -path */node_modules -not -path */.git* -not -path */.turbo* -not -path */dist*)",
       "Bash(pnpm drizzle-kit:*)",
       "Bash(pnpm migrate:*)",
-      "Bash(docker exec:*)"
+      "Bash(docker exec:*)",
+      "Bash(npx tsc:*)"
     ]
   }
 }

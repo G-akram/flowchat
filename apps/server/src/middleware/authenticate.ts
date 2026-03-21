@@ -2,6 +2,7 @@ import type { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { env } from '../lib/env';
 import { AppError } from '../lib/errors';
+import { findUserById } from '../features/auth/auth.repository';
 
 interface JwtPayload {
   sub: string;
@@ -9,15 +10,21 @@ interface JwtPayload {
   exp: number;
 }
 
+export interface AuthenticatedUser {
+  id: string;
+  email: string;
+  displayName: string;
+}
+
 declare global {
   namespace Express {
     interface Request {
-      userId: string;
+      user?: AuthenticatedUser;
     }
   }
 }
 
-export function authenticate(req: Request, _res: Response, next: NextFunction): void {
+export async function authenticate(req: Request, _res: Response, next: NextFunction): Promise<void> {
   const authHeader = req.headers.authorization;
 
   if (!authHeader?.startsWith('Bearer ')) {
@@ -40,6 +47,18 @@ export function authenticate(req: Request, _res: Response, next: NextFunction): 
     return;
   }
 
-  req.userId = payload.sub;
+  const dbUser = await findUserById(payload.sub);
+
+  if (!dbUser) {
+    next(new AppError('UNAUTHORIZED', 'User not found', 401));
+    return;
+  }
+
+  req.user = {
+    id: dbUser.id,
+    email: dbUser.email,
+    displayName: dbUser.displayName,
+  };
+
   next();
 }
