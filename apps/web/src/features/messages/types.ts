@@ -4,6 +4,12 @@ export interface MessageUser {
   avatarUrl: string | null;
 }
 
+export interface ReactionData {
+  emoji: string;
+  count: number;
+  hasReacted: boolean;
+}
+
 export interface MessageWithUser {
   id: string;
   channelId: string;
@@ -11,6 +17,7 @@ export interface MessageWithUser {
   editedAt: string | null;
   createdAt: string;
   user: MessageUser;
+  reactions: ReactionData[];
 }
 
 export interface OptimisticMessage extends MessageWithUser {

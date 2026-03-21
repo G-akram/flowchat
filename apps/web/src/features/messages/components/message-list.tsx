@@ -9,6 +9,7 @@ interface MessageListProps {
   onClearNewMessageFlag: () => void;
   onRetry: (tempId: string, content: string) => void;
   onRemoveFailed: (tempId: string) => void;
+  onToggleReaction: (messageId: string, emoji: string, hasReacted: boolean) => void;
 }
 
 const SCROLL_THRESHOLD = 150;
@@ -29,6 +30,7 @@ export function MessageList({
   onClearNewMessageFlag,
   onRetry,
   onRemoveFailed,
+  onToggleReaction,
 }: MessageListProps): React.JSX.Element {
   const {
     data,
@@ -159,6 +161,7 @@ export function MessageList({
                 isCompact={isCompact}
                 onRetry={onRetry}
                 onRemoveFailed={onRemoveFailed}
+                onToggleReaction={onToggleReaction}
               />
             );
           })}

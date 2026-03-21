@@ -1,13 +1,16 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { Avatar, Button } from '@flowchat/ui';
 import type { DisplayMessage } from '../types';
 import { isOptimisticMessage } from '../types';
+import { ReactionBar } from './reaction-bar';
+import { EmojiPicker } from './emoji-picker';
 
 interface MessageItemProps {
   message: DisplayMessage;
   isCompact: boolean;
-  onRetry?: (tempId: string, content: string) => void;
-  onRemoveFailed?: (tempId: string) => void;
+  onRetry: ((tempId: string, content: string) => void) | undefined;
+  onRemoveFailed: ((tempId: string) => void) | undefined;
+  onToggleReaction: (messageId: string, emoji: string, hasReacted: boolean) => void;
 }
 
 function formatTime(dateString: string): string {
@@ -20,17 +23,59 @@ export function MessageItem({
   isCompact,
   onRetry,
   onRemoveFailed,
+  onToggleReaction,
 }: MessageItemProps): React.JSX.Element {
   const isFailed = isOptimisticMessage(message) && message.status === 'failed';
   const isSending = isOptimisticMessage(message) && message.status === 'sending';
+  const isOptimistic = isOptimisticMessage(message);
+  const [showPicker, setShowPicker] = useState(false);
+
+  const reactions = message.reactions ?? [];
+  const hasReactions = reactions.length > 0;
+
+  const handleToggle = useCallback(
+    (emoji: string, hasReacted: boolean): void => {
+      onToggleReaction(message.id, emoji, hasReacted);
+    },
+    [message.id, onToggleReaction]
+  );
+
+  const handlePickerSelect = useCallback(
+    (emoji: string): void => {
+      const existing = reactions.find((r) => r.emoji === emoji);
+      onToggleReaction(message.id, emoji, existing?.hasReacted ?? false);
+    },
+    [message.id, reactions, onToggleReaction]
+  );
+
+  const addButton = !isOptimistic && (
+    <button
+      type="button"
+      className="invisible absolute -top-3 right-2 z-10 inline-flex h-6 items-center gap-1 rounded border border-gray-200 bg-white px-1.5 text-xs text-gray-400 shadow-sm transition-colors hover:border-gray-300 hover:text-gray-600 group-hover/msg:visible"
+      onClick={() => setShowPicker((prev) => !prev)}
+    >
+      <span className="text-sm leading-none">😀</span>
+      <span className="leading-none">+</span>
+    </button>
+  );
+
+  const picker = showPicker && (
+    <EmojiPicker
+      onSelect={handlePickerSelect}
+      onClose={() => setShowPicker(false)}
+    />
+  );
 
   if (isCompact) {
     return (
       <div
-        className={`group flex items-start gap-3 px-4 py-0.5 hover:bg-gray-50 ${isFailed ? 'bg-red-50' : ''}`}
+        className={`group/msg relative flex items-start gap-3 px-4 py-0.5 hover:bg-gray-50 ${isFailed ? 'bg-red-50' : ''}`}
       >
+        {addButton}
+        {picker}
+
         <div className="w-8 shrink-0 pt-0.5 text-center">
-          <span className="hidden text-xs text-gray-400 group-hover:inline">
+          <span className="invisible text-xs text-gray-400 group-hover/msg:visible">
             {formatTime(message.createdAt)}
           </span>
         </div>
@@ -49,6 +94,9 @@ export function MessageItem({
               onRemove={onRemoveFailed}
             />
           )}
+          {hasReactions && (
+            <ReactionBar reactions={reactions} onToggle={handleToggle} />
+          )}
         </div>
       </div>
     );
@@ -56,8 +104,11 @@ export function MessageItem({
 
   return (
     <div
-      className={`group flex items-start gap-3 px-4 pt-2 pb-1 hover:bg-gray-50 ${isFailed ? 'bg-red-50' : ''}`}
+      className={`group/msg relative flex items-start gap-3 px-4 pt-2 pb-1 hover:bg-gray-50 ${isFailed ? 'bg-red-50' : ''}`}
     >
+      {addButton}
+      {picker}
+
       <div className="shrink-0 pt-0.5">
         <Avatar
           src={message.user.avatarUrl}
@@ -92,6 +143,10 @@ export function MessageItem({
             onRetry={onRetry}
             onRemove={onRemoveFailed}
           />
+        )}
+
+        {hasReactions && (
+          <ReactionBar reactions={reactions} onToggle={handleToggle} />
         )}
       </div>
     </div>

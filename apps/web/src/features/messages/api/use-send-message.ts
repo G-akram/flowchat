@@ -43,6 +43,7 @@ export function useSendMessage() {
           editedAt: null,
           createdAt: new Date().toISOString(),
           status: 'sending',
+          reactions: [],
           user: {
             id: user.id,
             displayName: user.displayName,

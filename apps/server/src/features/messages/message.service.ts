@@ -9,6 +9,16 @@ import {
   findChannelMember,
   type MessageWithUser,
 } from './message.repository';
+import {
+  getReactionsForMessage,
+  getReactionsForMessages,
+} from '../reactions/reaction.repository';
+
+interface ReactionResponse {
+  emoji: string;
+  count: number;
+  hasReacted: boolean;
+}
 
 interface MessageResponse {
   id: string;
@@ -21,9 +31,13 @@ interface MessageResponse {
     displayName: string;
     avatarUrl: string | null;
   };
+  reactions: ReactionResponse[];
 }
 
-function mapMessage(msg: MessageWithUser): MessageResponse {
+function mapMessage(
+  msg: MessageWithUser,
+  reactions: ReactionResponse[] = []
+): MessageResponse {
   return {
     id: msg.id,
     channelId: msg.channelId,
@@ -31,6 +45,7 @@ function mapMessage(msg: MessageWithUser): MessageResponse {
     editedAt: msg.editedAt ? msg.editedAt.toISOString() : null,
     createdAt: msg.createdAt.toISOString(),
     user: msg.user,
+    reactions,
   };
 }
 
@@ -55,7 +70,7 @@ export async function create(
     content: input.content,
   });
 
-  return mapMessage(message);
+  return mapMessage(message, []);
 }
 
 export async function list(
@@ -69,7 +84,21 @@ export async function list(
   const rows = await findMessagesWithUser(channelId, limit, cursor);
 
   const hasMore = rows.length > limit;
-  const messages = rows.slice(0, limit).map(mapMessage);
+  const trimmed = rows.slice(0, limit);
+
+  const messageIds = trimmed.map((m) => m.id);
+  const reactionsMap = await getReactionsForMessages(messageIds);
+
+  const messages = trimmed.map((msg) => {
+    const aggregates = reactionsMap.get(msg.id) ?? [];
+    const reactionResponses = aggregates.map((agg) => ({
+      emoji: agg.emoji,
+      count: agg.count,
+      hasReacted: agg.userIds.includes(userId),
+    }));
+    return mapMessage(msg, reactionResponses);
+  });
+
   const nextCursor = hasMore ? messages[messages.length - 1]!.id : null;
 
   return { messages, nextCursor };
@@ -99,7 +128,14 @@ export async function update(
     throw new AppError('MESSAGE_NOT_FOUND', 'Message not found', 404);
   }
 
-  return mapMessage(updated);
+  const aggregates = await getReactionsForMessage(messageId);
+  const reactionResponses = aggregates.map((agg) => ({
+    emoji: agg.emoji,
+    count: agg.count,
+    hasReacted: agg.userIds.includes(userId),
+  }));
+
+  return mapMessage(updated, reactionResponses);
 }
 
 export async function remove(

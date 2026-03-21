@@ -5,6 +5,7 @@ import { MessageList } from './message-list';
 import { MessageInput } from './message-input';
 import { TypingIndicator } from './typing-indicator';
 import { useSendMessage } from '../api/use-send-message';
+import { useToggleReaction } from '../api/use-toggle-reaction';
 import { messagesQueryKey } from '../api/use-messages';
 import type { MessageWithUser } from '../types';
 
@@ -25,6 +26,7 @@ function generateTempId(): string {
 export function ChannelView({ channelId, channelName }: ChannelViewProps): React.JSX.Element {
   const { typingUsers, newMessageFlag, clearNewMessageFlag } = useChannelSocket(channelId);
   const { mutate: sendMessage } = useSendMessage();
+  const { mutate: toggleReaction } = useToggleReaction();
   const queryClient = useQueryClient();
 
   const handleRetry = useCallback(
@@ -66,6 +68,13 @@ export function ChannelView({ channelId, channelName }: ChannelViewProps): React
     [channelId, queryClient]
   );
 
+  const handleToggleReaction = useCallback(
+    (messageId: string, emoji: string, hasReacted: boolean): void => {
+      toggleReaction({ messageId, channelId, emoji, hasReacted });
+    },
+    [channelId, toggleReaction]
+  );
+
   return (
     <div className="flex h-full flex-col">
       <div className="flex h-12 shrink-0 items-center border-b border-gray-200 px-4">
@@ -80,6 +89,7 @@ export function ChannelView({ channelId, channelName }: ChannelViewProps): React
         onClearNewMessageFlag={clearNewMessageFlag}
         onRetry={handleRetry}
         onRemoveFailed={handleRemoveFailed}
+        onToggleReaction={handleToggleReaction}
       />
 
       <TypingIndicator typingUsers={typingUsers} />

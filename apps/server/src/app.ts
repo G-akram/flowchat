@@ -10,6 +10,7 @@ import { authRouter } from './features/auth/auth.routes';
 import { workspaceRouter } from './features/workspaces/workspace.routes';
 import { channelRouter } from './features/channels/channel.routes';
 import { messageRouter } from './features/messages/message.routes';
+import { reactionRouter } from './features/reactions/reaction.routes';
 
 export const app: Express = express();
 
@@ -39,5 +40,6 @@ app.use('/api/auth', authRouter);
 app.use('/api/workspaces', workspaceRouter);
 app.use('/api/workspaces/:workspaceId/channels', channelRouter);
 app.use('/api/channels/:channelId/messages', messageRouter);
+app.use('/api/messages/:messageId/reactions', reactionRouter);
 
 app.use(errorHandler);

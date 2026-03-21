@@ -83,7 +83,7 @@ export function useChannelSocket(channelId: string | undefined): UseChannelSocke
       }
     }
 
-    function handleUpdatedMessage(message: MessageWithUser): void {
+    function handleUpdatedMessage(message: Partial<MessageWithUser> & { id: string; channelId: string }): void {
       if (message.channelId !== channelId) return;
 
       const key = messagesQueryKey(channelId);
@@ -95,7 +95,10 @@ export function useChannelSocket(channelId: string | undefined): UseChannelSocke
           ...old,
           pages: old.pages.map((page) => ({
             ...page,
-            data: page.data.map((msg) => (msg.id === message.id ? message : msg)),
+            data: page.data.map((msg) => {
+              if (msg.id !== message.id) return msg;
+              return { ...msg, ...message };
+            }),
           })),
         };
       });
