@@ -1,9 +1,9 @@
 import React from 'react';
 import { Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { useAuthStore } from '@/stores/auth-store';
-import { useLogout } from '@/features/auth/api/use-logout';
+import { useWorkspaces } from '@/features/workspaces/api/use-workspaces';
 import { ChannelView } from '@/features/messages/components/channel-view';
-import { Button } from '@flowchat/ui';
+import { Sidebar } from '@/components/sidebar';
 
 function ChannelPage(): React.JSX.Element {
   const { channelId } = useParams<{ channelId: string }>();
@@ -36,46 +36,55 @@ function WelcomePage(): React.JSX.Element {
   );
 }
 
-export function AppShell(): React.JSX.Element {
-  const user = useAuthStore((s) => s.user);
-  const { mutate: logout, isPending } = useLogout();
-
+function WorkspaceLayout(): React.JSX.Element {
   return (
     <div className="flex h-screen bg-white">
-      <aside className="flex w-60 shrink-0 flex-col border-r border-gray-200 bg-gray-50">
-        <div className="flex h-12 items-center justify-between border-b border-gray-200 px-4">
-          <span className="text-sm font-semibold text-gray-900">FlowChat</span>
-        </div>
-
-        <div className="flex-1 overflow-y-auto p-3">
-          <p className="text-xs font-medium uppercase tracking-wider text-gray-400">
-            Channels
-          </p>
-        </div>
-
-        <div className="border-t border-gray-200 p-3">
-          <div className="flex items-center justify-between">
-            <span className="truncate text-sm text-gray-700">
-              {user?.displayName}
-            </span>
-            <Button
-              variant="ghost"
-              size="sm"
-              isLoading={isPending}
-              onClick={() => logout()}
-            >
-              Sign out
-            </Button>
-          </div>
-        </div>
-      </aside>
+      <Sidebar />
 
       <main className="flex flex-1 flex-col overflow-hidden">
         <Routes>
-          <Route path="channels/:channelId" element={<ChannelPage />} />
+          <Route path=":channelId" element={<ChannelPage />} />
           <Route path="*" element={<WelcomePage />} />
         </Routes>
       </main>
     </div>
+  );
+}
+
+function WorkspaceRedirect(): React.JSX.Element {
+  const { workspaces, isLoading } = useWorkspaces();
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <p className="text-sm text-gray-400">Loading workspaces…</p>
+      </div>
+    );
+  }
+
+  const firstWorkspace = workspaces?.[0];
+
+  if (firstWorkspace) {
+    return <Navigate to={`/app/${firstWorkspace.id}`} replace />;
+  }
+
+  return (
+    <div className="flex h-screen items-center justify-center">
+      <div className="text-center">
+        <h2 className="text-lg font-semibold text-gray-900">No workspaces</h2>
+        <p className="mt-1 text-sm text-gray-500">
+          Create a workspace to get started
+        </p>
+      </div>
+    </div>
+  );
+}
+
+export function AppShell(): React.JSX.Element {
+  return (
+    <Routes>
+      <Route path=":workspaceId/*" element={<WorkspaceLayout />} />
+      <Route path="*" element={<WorkspaceRedirect />} />
+    </Routes>
   );
 }
