@@ -3,6 +3,9 @@ import { Server as SocketServer } from 'socket.io';
 import jwt from 'jsonwebtoken';
 import { env } from '../lib/env';
 import { logger } from '../lib/logger';
+import { registerMessageHandler } from './handlers/message.handler';
+import { registerTypingHandler } from './handlers/typing.handler';
+import { registerPresenceHandler } from './handlers/presence.handler';
 
 interface JwtPayload {
   sub: string;
@@ -10,12 +13,17 @@ interface JwtPayload {
   exp: number;
 }
 
-export interface AuthenticatedSocket {
-  userId: string;
+let io: SocketServer | null = null;
+
+export function getIO(): SocketServer {
+  if (!io) {
+    throw new Error('Socket.IO has not been initialized');
+  }
+  return io;
 }
 
 export function initSocketServer(httpServer: HttpServer): SocketServer {
-  const io = new SocketServer(httpServer, {
+  io = new SocketServer(httpServer, {
     cors: {
       origin: env.CLIENT_URL,
       methods: ['GET', 'POST'],
@@ -40,13 +48,17 @@ export function initSocketServer(httpServer: HttpServer): SocketServer {
       return;
     }
 
-    (socket as typeof socket & { userId: string }).userId = payload.sub;
+    socket.data['userId'] = payload.sub;
     next();
   });
 
   io.on('connection', (socket) => {
-    const userId = (socket as typeof socket & { userId: string }).userId;
+    const userId = socket.data['userId'] as string;
     logger.info({ userId, socketId: socket.id }, 'Socket connected');
+
+    registerMessageHandler(socket, userId);
+    registerTypingHandler(socket, userId);
+    registerPresenceHandler(io!, socket, userId);
 
     socket.on('disconnect', (reason) => {
       logger.info({ userId, socketId: socket.id, reason }, 'Socket disconnected');
