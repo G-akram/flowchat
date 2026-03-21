@@ -13,6 +13,8 @@ export type ErrorCode =
   | 'WORKSPACE_NOT_FOUND'
   | 'CHANNEL_NOT_FOUND'
   | 'MESSAGE_NOT_FOUND'
+  | 'NOT_A_MEMBER'
+  | 'ALREADY_A_MEMBER'
   | 'RATE_LIMITED';
 
 export class AppError extends Error {

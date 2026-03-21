@@ -16,7 +16,10 @@
       "Bash(npx tsc:*)",
       "Bash(npm install:*)",
       "Bash(pnpm add:*)",
-      "Bash(npx vite:*)"
+      "Bash(npx vite:*)",
+      "Bash(npx tsx:*)",
+      "Bash(npx ts-node:*)",
+      "Bash(npm run:*)"
     ]
   }
 }
