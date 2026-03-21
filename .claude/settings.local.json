@@ -13,7 +13,10 @@
       "Bash(pnpm drizzle-kit:*)",
       "Bash(pnpm migrate:*)",
       "Bash(docker exec:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(npm install:*)",
+      "Bash(pnpm add:*)",
+      "Bash(npx vite:*)"
     ]
   }
 }
