@@ -11,6 +11,7 @@ import { workspaceRouter } from './features/workspaces/workspace.routes';
 import { channelRouter } from './features/channels/channel.routes';
 import { messageRouter } from './features/messages/message.routes';
 import { reactionRouter } from './features/reactions/reaction.routes';
+import { userRouter, presenceRouter } from './features/users/user.routes';
 
 export const app: Express = express();
 
@@ -41,5 +42,7 @@ app.use('/api/workspaces', workspaceRouter);
 app.use('/api/workspaces/:workspaceId/channels', channelRouter);
 app.use('/api/channels/:channelId/messages', messageRouter);
 app.use('/api/messages/:messageId/reactions', reactionRouter);
+app.use('/api/users', userRouter);
+app.use('/api/workspaces/:workspaceId/presence', presenceRouter);
 
 app.use(errorHandler);

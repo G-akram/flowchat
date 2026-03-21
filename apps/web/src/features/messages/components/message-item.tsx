@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { Avatar, Button } from '@flowchat/ui';
+import { PresenceDot } from '@/components/presence-dot';
 import type { DisplayMessage } from '../types';
 import { isOptimisticMessage } from '../types';
 import { ReactionBar } from './reaction-bar';
@@ -109,12 +110,15 @@ export function MessageItem({
       {addButton}
       {picker}
 
-      <div className="shrink-0 pt-0.5">
+      <div className="relative shrink-0 pt-0.5">
         <Avatar
           src={message.user.avatarUrl}
           alt={message.user.displayName}
           size="sm"
         />
+        <span className="absolute -bottom-0.5 -right-0.5">
+          <PresenceDot userId={message.user.id} size="sm" />
+        </span>
       </div>
 
       <div className="min-w-0 flex-1">

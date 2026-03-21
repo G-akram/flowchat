@@ -5,6 +5,7 @@ export const SOCKET_EVENTS = {
   TYPING_START: 'typing:start',
   TYPING_STOP: 'typing:stop',
   PRESENCE_UPDATE: 'presence:update',
+  PRESENCE_HEARTBEAT: 'presence:heartbeat',
   CHANNEL_JOINED: 'channel:joined',
 } as const;
 

@@ -5,6 +5,8 @@ import { useLogout } from '@/features/auth/api/use-logout';
 import { useWorkspaces } from '@/features/workspaces/api/use-workspaces';
 import { useChannels } from '@/features/channels/api/use-channels';
 import { Button } from '@flowchat/ui';
+import { PresenceDot } from '@/components/presence-dot';
+import { useUiStore } from '@/stores/ui-store';
 
 function ChannelListSkeleton(): React.JSX.Element {
   return (
@@ -32,6 +34,7 @@ export function Sidebar(): React.JSX.Element {
   }>();
   const user = useAuthStore((s) => s.user);
   const { mutate: logout, isPending } = useLogout();
+  const openModal = useUiStore((s) => s.openModal);
   const { workspaces, isLoading: isLoadingWorkspaces } = useWorkspaces();
   const { channels, isLoading: isLoadingChannels } = useChannels(workspaceId);
 
@@ -79,9 +82,16 @@ export function Sidebar(): React.JSX.Element {
 
       <div className="border-t border-gray-200 p-3">
         <div className="flex items-center justify-between">
-          <span className="truncate text-sm text-gray-700">
-            {user?.displayName}
-          </span>
+          <button
+            type="button"
+            className="flex min-w-0 items-center gap-2 rounded px-1 py-0.5 hover:bg-gray-100"
+            onClick={() => openModal('editProfile')}
+          >
+            {user && <PresenceDot userId={user.id} size="sm" />}
+            <span className="truncate text-sm text-gray-700">
+              {user?.displayName}
+            </span>
+          </button>
           <Button
             variant="ghost"
             size="sm"

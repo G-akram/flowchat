@@ -4,6 +4,9 @@ import { useAuthStore } from '@/stores/auth-store';
 import { useWorkspaces } from '@/features/workspaces/api/use-workspaces';
 import { ChannelView } from '@/features/messages/components/channel-view';
 import { Sidebar } from '@/components/sidebar';
+import { usePresence } from '@/hooks/use-presence';
+import { useHeartbeat } from '@/hooks/use-heartbeat';
+import { ProfileModal } from '@/features/users/components/profile-modal';
 
 function ChannelPage(): React.JSX.Element {
   const { channelId } = useParams<{ channelId: string }>();
@@ -37,6 +40,11 @@ function WelcomePage(): React.JSX.Element {
 }
 
 function WorkspaceLayout(): React.JSX.Element {
+  const { workspaceId } = useParams<{ workspaceId: string }>();
+
+  usePresence(workspaceId);
+  useHeartbeat();
+
   return (
     <div className="flex h-screen bg-white">
       <Sidebar />
@@ -47,6 +55,8 @@ function WorkspaceLayout(): React.JSX.Element {
           <Route path="*" element={<WelcomePage />} />
         </Routes>
       </main>
+
+      <ProfileModal />
     </div>
   );
 }
