@@ -43,14 +43,21 @@ export function useChannelSocket(channelId: string | undefined): UseChannelSocke
     if (!channelId) return;
 
     const socket = getSocket();
-    if (!socket.connected) {
-      connectSocket();
+
+    function joinChannel(): void {
+      socket.emit(SOCKET_EVENTS.CHANNEL_JOIN, channelId);
     }
 
-    socket.emit(SOCKET_EVENTS.CHANNEL_JOIN, channelId);
+    if (socket.connected) {
+      joinChannel();
+    } else {
+      connectSocket();
+      socket.once('connect', joinChannel);
+    }
 
     function handleNewMessage(message: MessageWithUser): void {
       if (message.channelId !== channelId) return;
+      if (message.user.id === currentUserId) return;
 
       const key = messagesQueryKey(channelId);
 
@@ -163,6 +170,7 @@ export function useChannelSocket(channelId: string | undefined): UseChannelSocke
     socket.on(SOCKET_EVENTS.TYPING_STOP, handleTypingStop);
 
     return () => {
+      socket.off('connect', joinChannel);
       socket.emit(SOCKET_EVENTS.CHANNEL_LEAVE, channelId);
       socket.off(SOCKET_EVENTS.MESSAGE_NEW, handleNewMessage);
       socket.off(SOCKET_EVENTS.MESSAGE_UPDATED, handleUpdatedMessage);
