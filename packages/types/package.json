@@ -1,0 +1,20 @@
+{
+  "name": "@flowchat/types",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@flowchat/config": "workspace:*",
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "zod": "^3.23.4"
+  }
+}

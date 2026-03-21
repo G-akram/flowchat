@@ -1,0 +1,46 @@
+{
+  "name": "@flowchat/server",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src",
+    "migrate": "tsx src/db/migrate.ts",
+    "seed": "tsx src/db/seed.ts"
+  },
+  "dependencies": {
+    "@flowchat/types": "workspace:*",
+    "bcryptjs": "^2.4.3",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.3.1",
+    "ioredis": "^5.4.1",
+    "jsonwebtoken": "^9.0.2",
+    "pino": "^9.1.0",
+    "pino-http": "^10.1.0",
+    "socket.io": "^4.7.5",
+    "drizzle-orm": "^0.31.2",
+    "pg": "^8.12.0",
+    "zod": "^3.23.4",
+    "cors": "^2.8.5",
+    "cookie-parser": "^1.4.6",
+    "dotenv": "^16.4.5",
+    "pino-pretty": "^11.0.0"
+  },
+  "devDependencies": {
+    "@flowchat/config": "workspace:*",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cookie-parser": "^1.4.7",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.6",
+    "@types/node": "^20.14.2",
+    "@types/pg": "^8.11.6",
+    "typescript-eslint": "^8.0.0",
+    "drizzle-kit": "^0.22.7",
+    "tsx": "^4.15.7",
+    "typescript": "^5.4.5"
+  }
+}

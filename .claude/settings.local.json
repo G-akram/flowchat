@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm dev:*)",
+      "Bash(pnpm typecheck:*)",
+      "Bash(pnpm --filter @flowchat/types exec tsc --noEmit)",
+      "Bash(pnpm --filter @flowchat/ui exec tsc --noEmit)",
+      "Bash(pnpm --filter @flowchat/server exec tsc --noEmit)",
+      "Bash(pnpm --filter @flowchat/web exec tsc --noEmit)",
+      "Bash(pnpm lint:*)",
+      "Bash(pnpm install:*)"
+    ]
+  }
+}
