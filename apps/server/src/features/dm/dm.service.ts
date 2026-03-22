@@ -6,7 +6,7 @@ import {
   findDmsByUserInWorkspace,
   type DmChannelWithOtherUser,
 } from './dm.repository';
-import type { DbChannel } from '../../db/schema/channels';
+
 
 interface DmOtherUser {
   id: string;

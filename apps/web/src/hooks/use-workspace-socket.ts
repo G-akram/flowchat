@@ -131,7 +131,7 @@ export function useWorkspaceSocket(workspaceId: string | undefined): void {
     socket.on(SOCKET_EVENTS.CHANNEL_UPDATED, handleChannelUpdated);
     socket.on(SOCKET_EVENTS.CHANNEL_DELETED, handleChannelDeleted);
 
-    return () => {
+    return (): void => {
       socket.off(SOCKET_EVENTS.NOTIFICATION_NEW, handleNotificationNew);
       socket.off(SOCKET_EVENTS.WORKSPACE_MEMBER_ADDED, handleWorkspaceMemberAdded);
       socket.off(SOCKET_EVENTS.WORKSPACE_MEMBER_REMOVED, handleWorkspaceMemberRemoved);

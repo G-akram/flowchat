@@ -13,6 +13,7 @@ async function main(): Promise<void> {
 
   const channelId = 'fc52aec4-6a7f-462c-9cd0-be6d9ea38e07';
 
+  // eslint-disable-next-line no-console
   console.log('1. Testing message query...');
   try {
     const rows = await db
@@ -32,10 +33,12 @@ async function main(): Promise<void> {
       .orderBy(desc(messages.createdAt))
       .limit(51);
 
+    // eslint-disable-next-line no-console
     console.log(`Found ${rows.length} messages`);
 
     if (rows.length > 0) {
       const messageIds = rows.map((r) => r.id);
+      // eslint-disable-next-line no-console
       console.log('2. Testing reactions query...');
 
       const reactionRows = await db
@@ -49,13 +52,16 @@ async function main(): Promise<void> {
         .where(inArray(reactions.messageId, messageIds))
         .groupBy(reactions.messageId, reactions.emoji);
 
+      // eslint-disable-next-line no-console
       console.log(`Found ${reactionRows.length} reaction groups`);
     }
   } catch (err) {
+    // eslint-disable-next-line no-console
     console.error('ERROR:', err);
   }
 
   await pool.end();
 }
 
+// eslint-disable-next-line no-console
 main().catch(console.error);

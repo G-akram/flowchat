@@ -19,7 +19,7 @@ export function useLogout(): ReturnType<typeof useMutation<void, AxiosError, voi
       setAccessToken(null);
       clearUser();
       queryClient.clear();
-      navigate('/login', { replace: true });
+      void navigate('/login', { replace: true });
     },
   });
 }

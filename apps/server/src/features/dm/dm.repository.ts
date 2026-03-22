@@ -1,8 +1,12 @@
-import { eq, and, sql } from 'drizzle-orm';
+import { eq, and, sql, ne } from 'drizzle-orm';
+import { alias } from 'drizzle-orm/pg-core';
 import { db } from '../../lib/db';
 import { channels, type DbChannel } from '../../db/schema/channels';
 import { channelMembers } from '../../db/schema/channel-members';
 import { users } from '../../db/schema/users';
+
+const memberA = alias(channelMembers, 'member_a');
+const memberB = alias(channelMembers, 'member_b');
 
 export async function findExistingDm(
   workspaceId: string,
@@ -12,28 +16,20 @@ export async function findExistingDm(
   const result = await db
     .select({ channel: channels })
     .from(channels)
-    .innerJoin(channelMembers, eq(channelMembers.channelId, channels.id))
+    .innerJoin(memberA, eq(memberA.channelId, channels.id))
+    .innerJoin(memberB, eq(memberB.channelId, channels.id))
     .where(
       and(
         eq(channels.workspaceId, workspaceId),
         eq(channels.isDirectMessage, true),
-        eq(channelMembers.userId, userIdA)
+        eq(memberA.userId, userIdA),
+        eq(memberB.userId, userIdB),
+        sql`(SELECT count(*) FROM channel_members WHERE channel_id = ${channels.id}) = 2`
       )
-    );
+    )
+    .limit(1);
 
-  for (const row of result) {
-    const members = await db
-      .select({ userId: channelMembers.userId })
-      .from(channelMembers)
-      .where(eq(channelMembers.channelId, row.channel.id));
-
-    const memberIds = members.map((m) => m.userId);
-    if (memberIds.length === 2 && memberIds.includes(userIdB)) {
-      return row.channel;
-    }
-  }
-
-  return undefined;
+  return result[0]?.channel;
 }
 
 export async function createDmChannel(input: {
@@ -74,42 +70,35 @@ export async function findDmsByUserInWorkspace(
   workspaceId: string,
   userId: string
 ): Promise<DmChannelWithOtherUser[]> {
-  const dmChannels = await db
-    .select({ channel: channels })
-    .from(channelMembers)
-    .innerJoin(channels, eq(channelMembers.channelId, channels.id))
+  const currentUserMember = alias(channelMembers, 'current_user_member');
+  const otherUserMember = alias(channelMembers, 'other_user_member');
+
+  const rows = await db
+    .select({
+      channel: channels,
+      otherUser: {
+        id: users.id,
+        displayName: users.displayName,
+        avatarUrl: users.avatarUrl,
+      },
+    })
+    .from(channels)
+    .innerJoin(currentUserMember, eq(currentUserMember.channelId, channels.id))
+    .innerJoin(
+      otherUserMember,
+      and(
+        eq(otherUserMember.channelId, channels.id),
+        ne(otherUserMember.userId, userId)
+      )
+    )
+    .innerJoin(users, eq(users.id, otherUserMember.userId))
     .where(
       and(
         eq(channels.workspaceId, workspaceId),
         eq(channels.isDirectMessage, true),
-        eq(channelMembers.userId, userId)
+        eq(currentUserMember.userId, userId)
       )
     );
 
-  const results: DmChannelWithOtherUser[] = [];
-
-  for (const row of dmChannels) {
-    const otherMember = await db
-      .select({
-        id: users.id,
-        displayName: users.displayName,
-        avatarUrl: users.avatarUrl,
-      })
-      .from(channelMembers)
-      .innerJoin(users, eq(channelMembers.userId, users.id))
-      .where(
-        and(
-          eq(channelMembers.channelId, row.channel.id),
-          sql`${channelMembers.userId} != ${userId}`
-        )
-      )
-      .limit(1);
-
-    const other = otherMember[0];
-    if (other) {
-      results.push({ channel: row.channel, otherUser: other });
-    }
-  }
-
-  return results;
+  return rows;
 }

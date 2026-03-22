@@ -1,6 +1,5 @@
-import { useMutation, useQueryClient, type InfiniteData } from '@tanstack/react-query';
+import { useMutation, useQueryClient, type InfiniteData, type UseMutationResult } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
-import { useAuthStore } from '@/stores/auth-store';
 import type { MessageWithUser, ReactionData } from '../types';
 import { messagesQueryKey } from './use-messages';
 
@@ -16,9 +15,8 @@ interface MessagesPage {
   nextCursor: string | null;
 }
 
-export function useToggleReaction() {
+export function useToggleReaction(): UseMutationResult<ReactionData[], Error, ToggleReactionVariables> {
   const queryClient = useQueryClient();
-  const userId = useAuthStore((s) => s.user?.id);
 
   return useMutation<ReactionData[], Error, ToggleReactionVariables>({
     mutationFn: async ({ messageId, emoji, hasReacted }): Promise<ReactionData[]> => {
@@ -57,10 +55,10 @@ export function useToggleReaction() {
               if (hasReacted) {
                 const idx = reactions.findIndex((r) => r.emoji === emoji);
                 if (idx !== -1) {
-                  const existing = reactions[idx]!;
-                  if (existing.count <= 1) {
+                  const existing = reactions[idx];
+                  if (existing && existing.count <= 1) {
                     reactions.splice(idx, 1);
-                  } else {
+                  } else if (existing) {
                     reactions[idx] = {
                       ...existing,
                       count: existing.count - 1,
@@ -71,12 +69,14 @@ export function useToggleReaction() {
               } else {
                 const idx = reactions.findIndex((r) => r.emoji === emoji);
                 if (idx !== -1) {
-                  const existing = reactions[idx]!;
-                  reactions[idx] = {
-                    ...existing,
-                    count: existing.count + 1,
-                    hasReacted: true,
-                  };
+                  const existing = reactions[idx];
+                  if (existing) {
+                    reactions[idx] = {
+                      ...existing,
+                      count: existing.count + 1,
+                      hasReacted: true,
+                    };
+                  }
                 } else {
                   reactions.push({ emoji, count: 1, hasReacted: true });
                 }

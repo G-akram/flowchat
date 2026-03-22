@@ -13,6 +13,10 @@ interface JwtPayload {
   exp: number;
 }
 
+interface SocketData {
+  userId: string;
+}
+
 let io: SocketServer | null = null;
 
 export function getIO(): SocketServer {
@@ -23,7 +27,7 @@ export function getIO(): SocketServer {
 }
 
 export function initSocketServer(httpServer: HttpServer): SocketServer {
-  io = new SocketServer(httpServer, {
+  const server = new SocketServer(httpServer, {
     cors: {
       origin: env.CLIENT_URL,
       methods: ['GET', 'POST'],
@@ -31,7 +35,7 @@ export function initSocketServer(httpServer: HttpServer): SocketServer {
     },
   });
 
-  io.use((socket, next) => {
+  server.use((socket, next) => {
     const token = socket.handshake.auth['token'] as unknown;
 
     if (typeof token !== 'string') {
@@ -48,22 +52,23 @@ export function initSocketServer(httpServer: HttpServer): SocketServer {
       return;
     }
 
-    socket.data['userId'] = payload.sub;
+    (socket.data as SocketData).userId = payload.sub;
     next();
   });
 
-  io.on('connection', (socket) => {
-    const userId = socket.data['userId'] as string;
+  server.on('connection', (socket) => {
+    const userId = (socket.data as SocketData).userId;
     logger.info({ userId, socketId: socket.id }, 'Socket connected');
 
     registerMessageHandler(socket, userId);
     registerTypingHandler(socket, userId);
-    registerPresenceHandler(io!, socket, userId);
+    registerPresenceHandler(server, socket, userId);
 
     socket.on('disconnect', (reason) => {
       logger.info({ userId, socketId: socket.id, reason }, 'Socket disconnected');
     });
   });
 
-  return io;
+  io = server;
+  return server;
 }

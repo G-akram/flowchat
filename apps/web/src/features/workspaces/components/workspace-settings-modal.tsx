@@ -42,14 +42,14 @@ export function WorkspaceSettingsModal(): React.JSX.Element | null {
   const { mutate: deleteWorkspace, isPending: isDeleting } = useDeleteWorkspace({
     onSuccess: () => {
       closeModal();
-      navigate('/app');
+      void navigate('/app');
     },
   });
 
   const { mutate: leaveWorkspace, isPending: isLeaving } = useLeaveWorkspace({
     onSuccess: () => {
       closeModal();
-      navigate('/app');
+      void navigate('/app');
     },
   });
 

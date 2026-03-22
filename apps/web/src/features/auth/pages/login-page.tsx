@@ -24,7 +24,7 @@ export function LoginPage(): React.JSX.Element {
   function onSubmit(values: LoginFormValues): void {
     login(values, {
       onSuccess: () => {
-        navigate('/app', { replace: true });
+        void navigate('/app', { replace: true });
       },
       onError: (err: AxiosError<ApiError>) => {
         const apiErr = err.response?.data?.error;

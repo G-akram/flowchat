@@ -31,7 +31,7 @@ export function ConnectionStatus(): React.JSX.Element | null {
     socket.on('disconnect', handleDisconnect);
     socket.io.on('reconnect_attempt', handleReconnectAttempt);
 
-    return () => {
+    return (): void => {
       socket.off('connect', handleConnect);
       socket.off('disconnect', handleDisconnect);
       socket.io.off('reconnect_attempt', handleReconnectAttempt);

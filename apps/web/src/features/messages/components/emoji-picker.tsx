@@ -31,7 +31,7 @@ export function EmojiPicker({ onSelect, onClose }: EmojiPickerProps): React.JSX.
     document.addEventListener('mousedown', handleClickOutside);
     document.addEventListener('keydown', handleEscape);
 
-    return () => {
+    return (): void => {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('keydown', handleEscape);
     };

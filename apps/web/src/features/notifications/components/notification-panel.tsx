@@ -53,7 +53,7 @@ function NotificationItem({
     }
 
     if (notification.actionUrl) {
-      navigate(notification.actionUrl);
+      void navigate(notification.actionUrl);
       onNavigate();
     }
   }
@@ -73,7 +73,7 @@ function NotificationItem({
       onClick={hasAction ? handleClick : undefined}
       role={hasAction ? 'button' : undefined}
       tabIndex={hasAction ? 0 : undefined}
-      onKeyDown={hasAction ? (e) => { if (e.key === 'Enter') handleClick(); } : undefined}
+      onKeyDown={hasAction ? (e): void => { if (e.key === 'Enter') handleClick(); } : undefined}
     >
       {!notification.isRead && (
         <span className="absolute left-1 top-1/2 h-2 w-2 -translate-y-1/2 rounded-full bg-blue-500" />
@@ -127,7 +127,7 @@ export function NotificationPanel({
     }
 
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    return (): void => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen, onClose]);
 
   if (!isOpen) return null;

@@ -1,4 +1,4 @@
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, type UseInfiniteQueryResult, type InfiniteData } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
 import type { MessageWithUser } from '../types';
 import { MESSAGES_QUERY_KEY, DEFAULT_MESSAGE_LIMIT } from '../constants';
@@ -12,7 +12,7 @@ export function messagesQueryKey(channelId: string): readonly [string, string] {
   return [MESSAGES_QUERY_KEY, channelId] as const;
 }
 
-export function useMessages(channelId: string | undefined) {
+export function useMessages(channelId: string | undefined): UseInfiniteQueryResult<InfiniteData<MessagesPage>, Error> {
   return useInfiniteQuery<MessagesPage, Error>({
     queryKey: messagesQueryKey(channelId ?? ''),
     queryFn: async ({ pageParam }): Promise<MessagesPage> => {

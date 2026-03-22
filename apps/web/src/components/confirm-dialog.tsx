@@ -29,7 +29,7 @@ export function ConfirmDialog({
     }
 
     document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    return (): void => document.removeEventListener('keydown', handleKeyDown);
   }, [open, onCancel]);
 
   if (!open) return null;

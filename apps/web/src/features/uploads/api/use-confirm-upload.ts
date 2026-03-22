@@ -1,4 +1,4 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, type UseMutationResult } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
 
 interface ConfirmAttachment {
@@ -13,7 +13,7 @@ interface ConfirmUploadInput {
   attachments: ConfirmAttachment[];
 }
 
-export function useConfirmUpload() {
+export function useConfirmUpload(): UseMutationResult<void, Error, ConfirmUploadInput> {
   return useMutation<void, Error, ConfirmUploadInput>({
     mutationFn: async (input): Promise<void> => {
       await apiClient.post('/uploads/confirm', input);

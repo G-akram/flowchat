@@ -49,7 +49,7 @@ export function useKeyboardNavigation(): void {
 
       const nextId = allIds[nextIndex];
       if (nextId) {
-        navigate(`/app/${workspaceId}/${nextId}`);
+        void navigate(`/app/${workspaceId}/${nextId}`);
       }
     },
     [workspaceId, channelId, channels, dms, activeModal, closeModal, navigate]
@@ -57,6 +57,6 @@ export function useKeyboardNavigation(): void {
 
   useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    return (): void => document.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
 }

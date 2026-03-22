@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient, type InfiniteData } from '@tanstack/react-query';
+import { useMutation, useQueryClient, type InfiniteData, type UseMutationResult } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { apiClient } from '@/lib/api-client';
 import { useAuthStore } from '@/stores/auth-store';
@@ -22,7 +22,7 @@ interface MessagesPage {
   nextCursor: string | null;
 }
 
-export function useSendMessage() {
+export function useSendMessage(): UseMutationResult<MessageWithUser, Error, SendMessageVariables> {
   const queryClient = useQueryClient();
   const user = useAuthStore((s) => s.user);
 

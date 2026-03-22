@@ -43,6 +43,7 @@ export function useChannelSocket(channelId: string | undefined): UseChannelSocke
     if (!channelId) return;
 
     const socket = getSocket();
+    const timers = typingTimers.current;
 
     function joinChannel(): void {
       socket.emit(SOCKET_EVENTS.CHANNEL_JOIN, channelId);
@@ -169,7 +170,7 @@ export function useChannelSocket(channelId: string | undefined): UseChannelSocke
     socket.on(SOCKET_EVENTS.TYPING_START, handleTypingStart);
     socket.on(SOCKET_EVENTS.TYPING_STOP, handleTypingStop);
 
-    return () => {
+    return (): void => {
       socket.off('connect', joinChannel);
       socket.emit(SOCKET_EVENTS.CHANNEL_LEAVE, channelId);
       socket.off(SOCKET_EVENTS.MESSAGE_NEW, handleNewMessage);
@@ -178,8 +179,8 @@ export function useChannelSocket(channelId: string | undefined): UseChannelSocke
       socket.off(SOCKET_EVENTS.TYPING_START, handleTypingStart);
       socket.off(SOCKET_EVENTS.TYPING_STOP, handleTypingStop);
 
-      typingTimers.current.forEach((timer) => clearTimeout(timer));
-      typingTimers.current.clear();
+      timers.forEach((timer) => clearTimeout(timer));
+      timers.clear();
       setTypingUsers([]);
     };
   }, [channelId, currentUserId, queryClient]);

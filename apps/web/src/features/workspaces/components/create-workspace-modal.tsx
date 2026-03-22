@@ -24,7 +24,7 @@ export function CreateWorkspaceModal(): React.JSX.Element | null {
   const { mutate, isPending } = useCreateWorkspace({
     onSuccess: (workspace) => {
       closeModal();
-      navigate(`/app/${workspace.id}`);
+      void navigate(`/app/${workspace.id}`);
     },
   });
 

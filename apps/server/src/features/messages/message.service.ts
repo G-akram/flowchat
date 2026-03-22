@@ -152,7 +152,8 @@ export async function list(
     return mapMessage(msg, reactionResponses, msgAttachments);
   });
 
-  const nextCursor = hasMore ? messages[messages.length - 1]!.id : null;
+  const lastMessage = hasMore ? messages[messages.length - 1] : undefined;
+  const nextCursor = lastMessage ? lastMessage.id : null;
 
   return { messages, nextCursor };
 }

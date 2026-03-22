@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { Avatar, Button } from '@flowchat/ui';
 import { PresenceDot } from '@/components/presence-dot';
 import type { DisplayMessage } from '../types';
@@ -22,7 +22,7 @@ function formatTime(dateString: string): string {
   return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
 }
 
-export function MessageItem({
+export const MessageItem = React.memo(function MessageItem({
   message,
   isCompact,
   onRetry,
@@ -36,7 +36,7 @@ export function MessageItem({
   const isOptimistic = isOptimisticMessage(message);
   const [showPicker, setShowPicker] = useState(false);
 
-  const reactions = message.reactions ?? [];
+  const reactions = useMemo(() => message.reactions ?? [], [message.reactions]);
   const hasReactions = reactions.length > 0;
 
   const handleToggle = useCallback(
@@ -176,7 +176,9 @@ export function MessageItem({
       </div>
     </div>
   );
-}
+});
+
+MessageItem.displayName = 'MessageItem';
 
 interface FailedActionsProps {
   tempId: string;

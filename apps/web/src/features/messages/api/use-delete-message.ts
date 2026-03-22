@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient, type InfiniteData } from '@tanstack/react-query';
+import { useMutation, useQueryClient, type InfiniteData, type UseMutationResult } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
 import type { MessageWithUser } from '../types';
 import { messagesQueryKey } from './use-messages';
@@ -13,7 +13,7 @@ interface MessagesPage {
   nextCursor: string | null;
 }
 
-export function useDeleteMessage() {
+export function useDeleteMessage(): UseMutationResult<void, Error, DeleteMessageVariables> {
   const queryClient = useQueryClient();
 
   return useMutation<void, Error, DeleteMessageVariables>({

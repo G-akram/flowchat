@@ -31,7 +31,7 @@ export function useOpenDm(): {
       return response.data.data.dm;
     },
     onSuccess: (_data, variables): void => {
-      queryClient.invalidateQueries({ queryKey: [DMS_QUERY_KEY, variables.workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: [DMS_QUERY_KEY, variables.workspaceId] });
     },
   });
 

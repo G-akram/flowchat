@@ -1,4 +1,4 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, type UseMutationResult } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
 import type { PresignResponse } from '../types';
 
@@ -8,7 +8,7 @@ interface PresignInput {
   fileSize: number;
 }
 
-export function usePresignUpload() {
+export function usePresignUpload(): UseMutationResult<PresignResponse, Error, PresignInput> {
   return useMutation<PresignResponse, Error, PresignInput>({
     mutationFn: async (input): Promise<PresignResponse> => {
       const response = await apiClient.post<{ data: PresignResponse }>(

@@ -64,11 +64,15 @@ async function seed(): Promise<void> {
     return;
   }
 
-  const alice = insertedUsers[0]!;
-  const bob = insertedUsers[1]!;
-  const charlie = insertedUsers[2]!;
-  const diana = insertedUsers[3]!;
-  const eve = insertedUsers[4]!;
+  const alice = insertedUsers[0];
+  const bob = insertedUsers[1];
+  const charlie = insertedUsers[2];
+  const diana = insertedUsers[3];
+  const eve = insertedUsers[4];
+
+  if (!alice || !bob || !charlie || !diana || !eve) {
+    throw new Error('Expected at least 5 seeded users (alice, bob, charlie, diana, eve)');
+  }
 
   // ── Workspace 1: "Acme Corp" — owned by Alice, 10 members ───────────────
   const [acme] = await db
@@ -81,9 +85,11 @@ async function seed(): Promise<void> {
   await db.insert(workspaceMembers).values({ workspaceId: acme.id, userId: alice.id, role: 'owner' });
   await db.insert(workspaceMembers).values({ workspaceId: acme.id, userId: bob.id, role: 'admin' });
   for (let i = 2; i < 10; i++) {
+    const member = insertedUsers[i];
+    if (!member) throw new Error(`Expected inserted user at index ${i}`);
     await db.insert(workspaceMembers).values({
       workspaceId: acme.id,
-      userId: insertedUsers[i]!.id,
+      userId: member.id,
       role: 'member',
     });
   }
@@ -117,12 +123,16 @@ async function seed(): Promise<void> {
 
   // All 10 Acme members join #general
   for (let i = 0; i < 10; i++) {
-    await db.insert(channelMembers).values({ channelId: acmeGeneral.id, userId: insertedUsers[i]!.id });
+    const member = insertedUsers[i];
+    if (!member) throw new Error(`Expected inserted user at index ${i}`);
+    await db.insert(channelMembers).values({ channelId: acmeGeneral.id, userId: member.id });
   }
 
   // 8 members in #random (all except user09, user10-index)
   for (let i = 0; i < 8; i++) {
-    await db.insert(channelMembers).values({ channelId: acmeRandom.id, userId: insertedUsers[i]!.id });
+    const member = insertedUsers[i];
+    if (!member) throw new Error(`Expected inserted user at index ${i}`);
+    await db.insert(channelMembers).values({ channelId: acmeRandom.id, userId: member.id });
   }
 
   // #engineering: alice, bob, charlie, diana
@@ -222,10 +232,12 @@ async function seed(): Promise<void> {
 
   await db.insert(workspaceMembers).values({ workspaceId: bigTeam.id, userId: diana.id, role: 'owner' });
   for (let i = 0; i < 20; i++) {
-    if (insertedUsers[i]!.id === diana.id) continue;
+    const member = insertedUsers[i];
+    if (!member) throw new Error(`Expected inserted user at index ${i}`);
+    if (member.id === diana.id) continue;
     await db.insert(workspaceMembers).values({
       workspaceId: bigTeam.id,
-      userId: insertedUsers[i]!.id,
+      userId: member.id,
       role: 'member',
     });
   }

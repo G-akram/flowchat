@@ -35,7 +35,7 @@ export function useHeartbeat(): void {
     const interval = setInterval(sendHeartbeat, HEARTBEAT_INTERVAL_MS);
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
-    return () => {
+    return (): void => {
       clearInterval(interval);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };

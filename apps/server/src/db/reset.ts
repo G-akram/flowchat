@@ -19,6 +19,7 @@ async function reset(): Promise<void> {
 }
 
 reset().catch((err: unknown) => {
+  // eslint-disable-next-line no-console
   console.error('Reset failed', err);
   process.exit(1);
 });

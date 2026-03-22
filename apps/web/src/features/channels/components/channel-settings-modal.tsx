@@ -39,7 +39,7 @@ export function ChannelSettingsModal(): React.JSX.Element | null {
     onSuccess: () => {
       closeModal();
       if (activeChannelId === channelId) {
-        navigate(`/app/${workspaceId}`);
+        void navigate(`/app/${workspaceId}`);
       }
     },
   });
@@ -48,7 +48,7 @@ export function ChannelSettingsModal(): React.JSX.Element | null {
     onSuccess: () => {
       closeModal();
       if (activeChannelId === channelId) {
-        navigate(`/app/${workspaceId}`);
+        void navigate(`/app/${workspaceId}`);
       }
     },
   });

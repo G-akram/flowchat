@@ -1,9 +1,7 @@
 import React, { useRef, useCallback, useState } from 'react';
 import { Button } from '@flowchat/ui';
-import { getSocket } from '@/lib/socket';
-import { useAuthStore } from '@/stores/auth-store';
 import { useSendMessage } from '../api/use-send-message';
-import { SOCKET_EVENTS, TYPING_DEBOUNCE_MS } from '../constants';
+import { useTypingIndicator } from '../hooks/use-typing-indicator';
 import { useFileUpload } from '@/features/uploads/hooks/use-file-upload';
 import { FilePreviewList } from '@/features/uploads/components/file-preview-list';
 
@@ -25,43 +23,9 @@ export function MessageInput({ channelId }: MessageInputProps): React.JSX.Elemen
   const [isUploading, setIsUploading] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const typingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const isTyping = useRef(false);
   const { mutate: sendMessage } = useSendMessage();
-  const user = useAuthStore((s) => s.user);
+  const { emitTypingStart, resetTypingTimer, clearTypingState } = useTypingIndicator(channelId);
   const { pendingUploads, addFiles, removeFile, uploadAll, clearAll, hasFiles } = useFileUpload();
-
-  const emitTypingStart = useCallback((): void => {
-    if (!user || isTyping.current) return;
-
-    isTyping.current = true;
-    const socket = getSocket();
-    socket.emit(SOCKET_EVENTS.TYPING_START, {
-      channelId,
-      displayName: user.displayName,
-    });
-  }, [channelId, user]);
-
-  const emitTypingStop = useCallback((): void => {
-    if (!user || !isTyping.current) return;
-
-    isTyping.current = false;
-    const socket = getSocket();
-    socket.emit(SOCKET_EVENTS.TYPING_STOP, {
-      channelId,
-      displayName: user.displayName,
-    });
-  }, [channelId, user]);
-
-  const resetTypingTimer = useCallback((): void => {
-    if (typingTimer.current) {
-      clearTimeout(typingTimer.current);
-    }
-
-    typingTimer.current = setTimeout(() => {
-      emitTypingStop();
-    }, TYPING_DEBOUNCE_MS);
-  }, [emitTypingStop]);
 
   const resizeTextarea = useCallback((): void => {
     const textarea = textareaRef.current;
@@ -106,12 +70,7 @@ export function MessageInput({ channelId }: MessageInputProps): React.JSX.Elemen
     }
 
     setContent('');
-    emitTypingStop();
-
-    if (typingTimer.current) {
-      clearTimeout(typingTimer.current);
-      typingTimer.current = null;
-    }
+    clearTypingState();
 
     requestAnimationFrame(() => {
       if (textareaRef.current) {
@@ -119,7 +78,7 @@ export function MessageInput({ channelId }: MessageInputProps): React.JSX.Elemen
         textareaRef.current.focus();
       }
     });
-  }, [content, channelId, sendMessage, emitTypingStop, hasFiles, uploadAll, clearAll]);
+  }, [content, channelId, sendMessage, clearTypingState, hasFiles, uploadAll, clearAll]);
 
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLTextAreaElement>): void => {
@@ -142,12 +101,8 @@ export function MessageInput({ channelId }: MessageInputProps): React.JSX.Elemen
   );
 
   const handleBlur = useCallback((): void => {
-    emitTypingStop();
-    if (typingTimer.current) {
-      clearTimeout(typingTimer.current);
-      typingTimer.current = null;
-    }
-  }, [emitTypingStop]);
+    clearTypingState();
+  }, [clearTypingState]);
 
   const handleDragOver = useCallback((event: React.DragEvent): void => {
     event.preventDefault();

@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
 import type { SearchResultMessage } from '../types';
 
@@ -11,7 +11,7 @@ interface SearchResponse {
   };
 }
 
-export function useSearchMessages(workspaceId: string | undefined, query: string) {
+export function useSearchMessages(workspaceId: string | undefined, query: string): UseQueryResult<SearchResultMessage[], Error> {
   const trimmed = query.trim();
 
   return useQuery<SearchResultMessage[], Error>({

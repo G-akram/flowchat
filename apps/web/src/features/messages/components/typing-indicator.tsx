@@ -10,12 +10,15 @@ interface TypingIndicatorProps {
 }
 
 function formatTypingText(users: TypingUser[]): string {
-  if (users.length === 1) {
-    return `${users[0]!.displayName} is typing...`;
+  const first = users[0];
+  const second = users[1];
+
+  if (users.length === 1 && first) {
+    return `${first.displayName} is typing...`;
   }
 
-  if (users.length === 2) {
-    return `${users[0]!.displayName} and ${users[1]!.displayName} are typing...`;
+  if (users.length === 2 && first && second) {
+    return `${first.displayName} and ${second.displayName} are typing...`;
   }
 
   return 'Several people are typing...';

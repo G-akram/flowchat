@@ -29,7 +29,7 @@ export function CreateChannelModal(): React.JSX.Element | null {
     onSuccess: (channel) => {
       closeModal();
       if (workspaceId) {
-        navigate(`/app/${workspaceId}/${channel.id}`);
+        void navigate(`/app/${workspaceId}/${channel.id}`);
       }
     },
   });

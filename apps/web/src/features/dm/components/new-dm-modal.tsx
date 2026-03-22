@@ -23,7 +23,7 @@ export function NewDmModal(): React.JSX.Element {
       try {
         const dm = await openDm({ workspaceId, userId });
         closeModal();
-        navigate(`/app/${workspaceId}/${dm.id}`);
+        void navigate(`/app/${workspaceId}/${dm.id}`);
       } catch {
         // error handled by query client
       }

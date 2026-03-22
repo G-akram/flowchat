@@ -109,7 +109,7 @@ export function SearchModal(): React.JSX.Element | null {
   const handleResultClick = useCallback(
     (result: SearchResultMessage): void => {
       closeModal();
-      navigate(`/app/${workspaceId}/${result.channelId}?highlight=${result.id}`);
+      void navigate(`/app/${workspaceId}/${result.channelId}?highlight=${result.id}`);
     },
     [closeModal, navigate, workspaceId]
   );

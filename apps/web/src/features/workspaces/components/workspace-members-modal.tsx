@@ -88,7 +88,7 @@ export function WorkspaceMembersModal(): React.JSX.Element {
     try {
       const dm = await openDm({ workspaceId, userId });
       handleClose();
-      navigate(`/app/${workspaceId}/dm/${dm.id}`);
+      void navigate(`/app/${workspaceId}/dm/${dm.id}`);
     } catch {
       // silently ignore DM open errors
     }

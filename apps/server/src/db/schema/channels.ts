@@ -21,6 +21,7 @@ export const channels = pgTable(
   (t) => [
     index('channels_workspace_id_idx').on(t.workspaceId),
     index('channels_created_by_id_idx').on(t.createdById),
+    index('channels_workspace_dm_idx').on(t.workspaceId, t.isDirectMessage),
   ]
 );
 

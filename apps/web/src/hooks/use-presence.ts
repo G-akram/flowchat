@@ -64,7 +64,7 @@ export function usePresence(workspaceId: string | undefined): void {
 
     socket.on(SOCKET_PRESENCE_UPDATE, handlePresenceUpdate);
 
-    return () => {
+    return (): void => {
       socket.off('connect', joinWorkspace);
       socket.emit('workspace:leave', workspaceId);
       socket.off(SOCKET_PRESENCE_UPDATE, handlePresenceUpdate);

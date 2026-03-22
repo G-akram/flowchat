@@ -83,7 +83,8 @@ export function useFileUpload(): UseFileUploadReturn {
     const results: UploadResult[] = [];
 
     for (let i = 0; i < current.length; i++) {
-      const upload = current[i]!;
+      const upload = current[i];
+      if (!upload) continue;
 
       try {
         const fileToUpload = await maybeCompressImage(upload.file);

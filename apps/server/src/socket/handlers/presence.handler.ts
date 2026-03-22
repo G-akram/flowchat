@@ -29,7 +29,7 @@ export function registerPresenceHandler(
     if (typeof workspaceId !== 'string') return;
 
     const room = `workspace:${workspaceId}`;
-    socket.join(room);
+    void socket.join(room);
 
     await setPresence(userId, 'online');
 
@@ -95,7 +95,7 @@ async function handleWorkspaceLeave(
   workspaceId: string
 ): Promise<void> {
   const room = `workspace:${workspaceId}`;
-  socket.leave(room);
+  void socket.leave(room);
 
   const remainingWorkspaceRooms = Array.from(socket.rooms).filter((r) =>
     r.startsWith('workspace:')
