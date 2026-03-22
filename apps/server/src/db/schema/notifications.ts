@@ -1,4 +1,13 @@
-import { pgTable, uuid, varchar, text, boolean, timestamp, index, pgEnum } from 'drizzle-orm/pg-core';
+import {
+  pgTable,
+  uuid,
+  varchar,
+  text,
+  boolean,
+  timestamp,
+  index,
+  pgEnum,
+} from 'drizzle-orm/pg-core';
 import { users } from './users';
 import { workspaces } from './workspaces';
 
@@ -26,11 +35,11 @@ export const notifications = pgTable(
     isRead: boolean('is_read').notNull().default(false),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [
-    index('notifications_user_id_idx').on(t.userId),
-    index('notifications_user_created_idx').on(t.userId, t.createdAt),
-    index('notifications_user_is_read_idx').on(t.userId, t.isRead),
-  ]
+  (t) => ({
+    userIdIdx: index('notifications_user_id_idx').on(t.userId),
+    userCreatedIdx: index('notifications_user_created_idx').on(t.userId, t.createdAt),
+    userIsReadIdx: index('notifications_user_is_read_idx').on(t.userId, t.isRead),
+  })
 );
 
 export type DbNotification = typeof notifications.$inferSelect;

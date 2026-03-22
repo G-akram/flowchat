@@ -12,7 +12,10 @@ export const users = pgTable(
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [index('users_email_idx').on(t.email), index('users_username_idx').on(t.username)]
+  (t) => ({
+    emailIdx: index('users_email_idx').on(t.email),
+    usernameIdx: index('users_username_idx').on(t.username),
+  })
 );
 
 export type DbUser = typeof users.$inferSelect;

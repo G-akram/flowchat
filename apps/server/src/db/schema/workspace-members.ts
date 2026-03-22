@@ -2,11 +2,7 @@ import { pgTable, uuid, timestamp, pgEnum, primaryKey, index } from 'drizzle-orm
 import { users } from './users';
 import { workspaces } from './workspaces';
 
-export const workspaceMemberRole = pgEnum('workspace_member_role', [
-  'owner',
-  'admin',
-  'member',
-]);
+export const workspaceMemberRole = pgEnum('workspace_member_role', ['owner', 'admin', 'member']);
 
 export const workspaceMembers = pgTable(
   'workspace_members',
@@ -20,11 +16,11 @@ export const workspaceMembers = pgTable(
     role: workspaceMemberRole('role').notNull().default('member'),
     joinedAt: timestamp('joined_at', { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [
-    primaryKey({ columns: [t.workspaceId, t.userId] }),
-    index('workspace_members_workspace_id_idx').on(t.workspaceId),
-    index('workspace_members_user_id_idx').on(t.userId),
-  ]
+  (t) => ({
+    pk: primaryKey({ columns: [t.workspaceId, t.userId] }),
+    workspaceIdIdx: index('workspace_members_workspace_id_idx').on(t.workspaceId),
+    userIdIdx: index('workspace_members_user_id_idx').on(t.userId),
+  })
 );
 
 export type DbWorkspaceMember = typeof workspaceMembers.$inferSelect;

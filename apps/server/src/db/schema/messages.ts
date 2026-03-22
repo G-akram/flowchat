@@ -17,12 +17,15 @@ export const messages = pgTable(
     editedAt: timestamp('edited_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [
-    index('messages_channel_id_idx').on(t.channelId),
-    index('messages_user_id_idx').on(t.userId),
-    index('messages_created_at_idx').on(t.createdAt),
-    index('messages_content_search_idx').using('gin', sql`to_tsvector('english', ${t.content})`),
-  ]
+  (t) => ({
+    channelIdIdx: index('messages_channel_id_idx').on(t.channelId),
+    userIdIdx: index('messages_user_id_idx').on(t.userId),
+    createdAtIdx: index('messages_created_at_idx').on(t.createdAt),
+    contentSearchIdx: index('messages_content_search_idx').using(
+      'gin',
+      sql`to_tsvector('english', ${t.content})`
+    ),
+  })
 );
 
 export type DbMessage = typeof messages.$inferSelect;

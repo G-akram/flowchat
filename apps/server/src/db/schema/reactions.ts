@@ -14,10 +14,10 @@ export const reactions = pgTable(
     emoji: varchar('emoji', { length: 64 }).notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [
-    primaryKey({ columns: [t.messageId, t.userId, t.emoji] }),
-    index('reactions_message_id_idx').on(t.messageId),
-  ]
+  (t) => ({
+    pk: primaryKey({ columns: [t.messageId, t.userId, t.emoji] }),
+    messageIdIdx: index('reactions_message_id_idx').on(t.messageId),
+  })
 );
 
 export type DbReaction = typeof reactions.$inferSelect;

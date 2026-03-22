@@ -12,7 +12,9 @@ export const workspaces = pgTable(
       .references(() => users.id, { onDelete: 'restrict' }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [index('workspaces_owner_id_idx').on(t.ownerId)]
+  (t) => ({
+    ownerIdIdx: index('workspaces_owner_id_idx').on(t.ownerId),
+  })
 );
 
 export type DbWorkspace = typeof workspaces.$inferSelect;

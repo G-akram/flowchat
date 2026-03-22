@@ -13,7 +13,9 @@ export const messageAttachments = pgTable(
     fileSize: integer('file_size').notNull(),
     mimeType: varchar('mime_type', { length: 127 }).notNull(),
   },
-  (t) => [index('message_attachments_message_id_idx').on(t.messageId)]
+  (t) => ({
+    messageIdIdx: index('message_attachments_message_id_idx').on(t.messageId),
+  })
 );
 
 export type DbMessageAttachment = typeof messageAttachments.$inferSelect;

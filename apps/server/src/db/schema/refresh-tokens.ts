@@ -12,10 +12,10 @@ export const refreshTokens = pgTable(
     expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [
-    index('refresh_tokens_user_id_idx').on(t.userId),
-    index('refresh_tokens_expires_at_idx').on(t.expiresAt),
-  ]
+  (t) => ({
+    userIdIdx: index('refresh_tokens_user_id_idx').on(t.userId),
+    expiresAtIdx: index('refresh_tokens_expires_at_idx').on(t.expiresAt),
+  })
 );
 
 export type DbRefreshToken = typeof refreshTokens.$inferSelect;

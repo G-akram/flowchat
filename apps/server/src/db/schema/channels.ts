@@ -18,11 +18,11 @@ export const channels = pgTable(
       .references(() => users.id, { onDelete: 'restrict' }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [
-    index('channels_workspace_id_idx').on(t.workspaceId),
-    index('channels_created_by_id_idx').on(t.createdById),
-    index('channels_workspace_dm_idx').on(t.workspaceId, t.isDirectMessage),
-  ]
+  (t) => ({
+    workspaceIdIdx: index('channels_workspace_id_idx').on(t.workspaceId),
+    createdByIdIdx: index('channels_created_by_id_idx').on(t.createdById),
+    workspaceDmIdx: index('channels_workspace_dm_idx').on(t.workspaceId, t.isDirectMessage),
+  })
 );
 
 export type DbChannel = typeof channels.$inferSelect;
