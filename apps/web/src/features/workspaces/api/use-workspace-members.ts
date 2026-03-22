@@ -8,6 +8,7 @@ export interface WorkspaceMember {
   displayName: string;
   username: string;
   avatarUrl: string | null;
+  role: string;
 }
 
 interface MembersResponse {

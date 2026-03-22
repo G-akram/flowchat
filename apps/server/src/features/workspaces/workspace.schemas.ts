@@ -22,7 +22,13 @@ export const updateWorkspaceSchema = z.object({
     .max(64, 'Workspace name must be at most 64 characters'),
 });
 
+export const memberParamsSchema = z.object({
+  workspaceId: z.string().uuid('Invalid workspace ID'),
+  userId: z.string().uuid('Invalid user ID'),
+});
+
 export type CreateWorkspaceInput = z.infer<typeof createWorkspaceSchema>;
 export type UpdateWorkspaceInput = z.infer<typeof updateWorkspaceSchema>;
 export type WorkspaceParams = z.infer<typeof workspaceParamsSchema>;
+export type MemberParams = z.infer<typeof memberParamsSchema>;
 export type InviteMemberInput = z.infer<typeof inviteMemberSchema>;

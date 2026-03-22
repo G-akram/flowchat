@@ -221,3 +221,37 @@ export async function leave(
 
   await removeWorkspaceMember(workspaceId, userId);
 }
+
+export async function kickMember(
+  workspaceId: string,
+  targetUserId: string,
+  requestingUserId: string
+): Promise<void> {
+  const workspace = await findWorkspaceById(workspaceId);
+
+  if (!workspace) {
+    throw new AppError('WORKSPACE_NOT_FOUND', 'Workspace not found', 404);
+  }
+
+  const requester = await findWorkspaceMember(workspaceId, requestingUserId);
+
+  if (!requester || (requester.role !== 'owner' && requester.role !== 'admin')) {
+    throw new AppError('FORBIDDEN', 'Only owners and admins can remove members', 403);
+  }
+
+  const target = await findWorkspaceMember(workspaceId, targetUserId);
+
+  if (!target) {
+    throw new AppError('NOT_A_MEMBER', 'User is not a member of this workspace', 404);
+  }
+
+  if (target.role === 'owner') {
+    throw new AppError('FORBIDDEN', 'Cannot remove the workspace owner', 403);
+  }
+
+  if (target.role === 'admin' && requester.role !== 'owner') {
+    throw new AppError('FORBIDDEN', 'Only the owner can remove admins', 403);
+  }
+
+  await removeWorkspaceMember(workspaceId, targetUserId);
+}

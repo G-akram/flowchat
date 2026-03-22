@@ -6,6 +6,7 @@ import {
   updateChannelSchema,
   addChannelMemberSchema,
   channelParamsSchema,
+  channelMemberParamsSchema,
   workspaceParamsSchema,
 } from './channel.schemas';
 import {
@@ -17,6 +18,8 @@ import {
   deleteChannelHandler,
   leaveChannelHandler,
   addChannelMemberHandler,
+  listChannelMembersHandler,
+  kickChannelMemberHandler,
 } from './channel.controller';
 
 const router: ExpressRouter = Router({ mergeParams: true });
@@ -58,10 +61,20 @@ router.post(
   validate({ params: channelParamsSchema }),
   leaveChannelHandler
 );
+router.get(
+  '/:channelId/members',
+  validate({ params: channelParamsSchema }),
+  listChannelMembersHandler
+);
 router.post(
   '/:channelId/members',
   validate({ params: channelParamsSchema, body: addChannelMemberSchema }),
   addChannelMemberHandler
+);
+router.delete(
+  '/:channelId/members/:userId',
+  validate({ params: channelMemberParamsSchema }),
+  kickChannelMemberHandler
 );
 
 export { router as channelRouter };

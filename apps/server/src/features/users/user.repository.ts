@@ -44,6 +44,7 @@ export interface WorkspaceMemberProfile {
   displayName: string;
   username: string;
   avatarUrl: string | null;
+  role: string;
 }
 
 export async function findWorkspaceMemberProfiles(
@@ -55,6 +56,7 @@ export async function findWorkspaceMemberProfiles(
       displayName: users.displayName,
       username: users.username,
       avatarUrl: users.avatarUrl,
+      role: workspaceMembers.role,
     })
     .from(workspaceMembers)
     .innerJoin(users, eq(workspaceMembers.userId, users.id))

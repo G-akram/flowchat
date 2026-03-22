@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from 'express';
-import type { CreateWorkspaceInput, UpdateWorkspaceInput, WorkspaceParams, InviteMemberInput } from './workspace.schemas';
-import { create, listByUser, getById, inviteMember, update, remove, leave } from './workspace.service';
+import type { CreateWorkspaceInput, UpdateWorkspaceInput, WorkspaceParams, MemberParams, InviteMemberInput } from './workspace.schemas';
+import { create, listByUser, getById, inviteMember, update, remove, leave, kickMember } from './workspace.service';
 import { AppError } from '../../lib/errors';
 
 export async function createWorkspaceHandler(
@@ -136,6 +136,26 @@ export async function leaveWorkspaceHandler(
     }
 
     await leave(req.params.workspaceId, user.id);
+
+    res.status(204).send();
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function kickMemberHandler(
+  req: Request<MemberParams>,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const user = req.user;
+
+    if (!user) {
+      throw new AppError('UNAUTHORIZED', 'Not authenticated', 401);
+    }
+
+    await kickMember(req.params.workspaceId, req.params.userId, user.id);
 
     res.status(204).send();
   } catch (err) {

@@ -5,6 +5,7 @@ import {
   createWorkspaceSchema,
   updateWorkspaceSchema,
   workspaceParamsSchema,
+  memberParamsSchema,
   inviteMemberSchema,
 } from './workspace.schemas';
 import {
@@ -15,6 +16,7 @@ import {
   updateWorkspaceHandler,
   deleteWorkspaceHandler,
   leaveWorkspaceHandler,
+  kickMemberHandler,
 } from './workspace.controller';
 import { listWorkspaceMembersHandler } from '../users/user.controller';
 
@@ -53,6 +55,11 @@ router.post(
   '/:workspaceId/leave',
   validate({ params: workspaceParamsSchema }),
   leaveWorkspaceHandler
+);
+router.delete(
+  '/:workspaceId/members/:userId',
+  validate({ params: memberParamsSchema }),
+  kickMemberHandler
 );
 
 export { router as workspaceRouter };

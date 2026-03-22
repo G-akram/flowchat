@@ -17,6 +17,8 @@ import { InviteMemberModal } from '@/features/workspaces/components/invite-membe
 import { CreateChannelModal } from '@/features/channels/components/create-channel-modal';
 import { EditChannelModal } from '@/features/channels/components/edit-channel-modal';
 import { AddChannelMembersModal } from '@/features/channels/components/add-channel-members-modal';
+import { WorkspaceMembersModal } from '@/features/workspaces/components/workspace-members-modal';
+import { ChannelMembersModal } from '@/features/channels/components/channel-members-modal';
 import { Button } from '@flowchat/ui';
 import { useUiStore } from '@/stores/ui-store';
 
@@ -89,6 +91,8 @@ function WorkspaceLayout(): React.JSX.Element {
       <CreateChannelModal />
       <EditChannelModal />
       <AddChannelMembersModal />
+      <WorkspaceMembersModal />
+      <ChannelMembersModal />
     </div>
   );
 }

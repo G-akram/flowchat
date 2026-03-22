@@ -10,6 +10,8 @@ import {
   updateChannel as updateChannelInDb,
   deleteChannel as deleteChannelInDb,
   removeChannelMember,
+  findChannelMemberProfiles,
+  type ChannelMemberProfile,
 } from './channel.repository';
 import type { DbChannel } from '../../db/schema/channels';
 
@@ -256,4 +258,59 @@ export async function addMember(
   }
 
   await addChannelMember({ channelId, userId: input.userId });
+}
+
+export async function listMembers(
+  workspaceId: string,
+  channelId: string,
+  userId: string
+): Promise<ChannelMemberProfile[]> {
+  const wsMember = await findWorkspaceMember(workspaceId, userId);
+
+  if (!wsMember) {
+    throw new AppError('NOT_A_MEMBER', 'You are not a member of this workspace', 403);
+  }
+
+  const channel = await findChannelById(channelId);
+
+  if (!channel || channel.workspaceId !== workspaceId) {
+    throw new AppError('CHANNEL_NOT_FOUND', 'Channel not found', 404);
+  }
+
+  return findChannelMemberProfiles(channelId);
+}
+
+export async function kickMember(
+  workspaceId: string,
+  channelId: string,
+  targetUserId: string,
+  requestingUserId: string
+): Promise<void> {
+  const wsMember = await findWorkspaceMember(workspaceId, requestingUserId);
+
+  if (!wsMember) {
+    throw new AppError('NOT_A_MEMBER', 'You are not a member of this workspace', 403);
+  }
+
+  const channel = await findChannelById(channelId);
+
+  if (!channel || channel.workspaceId !== workspaceId) {
+    throw new AppError('CHANNEL_NOT_FOUND', 'Channel not found', 404);
+  }
+
+  if (channel.name === 'general') {
+    throw new AppError('FORBIDDEN', 'Cannot remove members from the #general channel', 403);
+  }
+
+  if (!canManageChannel(wsMember.role, channel.createdById, requestingUserId)) {
+    throw new AppError('FORBIDDEN', 'You do not have permission to remove members from this channel', 403);
+  }
+
+  const member = await findChannelMember(channelId, targetUserId);
+
+  if (!member) {
+    throw new AppError('NOT_A_MEMBER', 'User is not a member of this channel', 404);
+  }
+
+  await removeChannelMember(channelId, targetUserId);
 }

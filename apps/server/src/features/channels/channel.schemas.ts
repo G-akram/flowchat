@@ -33,7 +33,14 @@ export const addChannelMemberSchema = z.object({
   userId: z.string().uuid('Invalid user ID'),
 });
 
+export const channelMemberParamsSchema = z.object({
+  workspaceId: z.string().uuid('Invalid workspace ID'),
+  channelId: z.string().uuid('Invalid channel ID'),
+  userId: z.string().uuid('Invalid user ID'),
+});
+
 export type ChannelParams = z.infer<typeof channelParamsSchema>;
+export type ChannelMemberParams = z.infer<typeof channelMemberParamsSchema>;
 export type WorkspaceParams = z.infer<typeof workspaceParamsSchema>;
 export type CreateChannelInput = z.infer<typeof createChannelSchema>;
 export type UpdateChannelInput = z.infer<typeof updateChannelSchema>;

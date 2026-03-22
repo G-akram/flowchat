@@ -3,6 +3,7 @@ import { db } from '../../lib/db';
 import { channels, type DbChannel } from '../../db/schema/channels';
 import { channelMembers, type DbChannelMember } from '../../db/schema/channel-members';
 import { workspaceMembers } from '../../db/schema/workspace-members';
+import { users } from '../../db/schema/users';
 
 export async function createChannel(input: {
   workspaceId: string;
@@ -126,4 +127,28 @@ export async function findWorkspaceMember(
     .limit(1);
 
   return result[0];
+}
+
+export interface ChannelMemberProfile {
+  id: string;
+  displayName: string;
+  username: string;
+  avatarUrl: string | null;
+}
+
+export async function findChannelMemberProfiles(
+  channelId: string
+): Promise<ChannelMemberProfile[]> {
+  const result = await db
+    .select({
+      id: users.id,
+      displayName: users.displayName,
+      username: users.username,
+      avatarUrl: users.avatarUrl,
+    })
+    .from(channelMembers)
+    .innerJoin(users, eq(channelMembers.userId, users.id))
+    .where(eq(channelMembers.channelId, channelId));
+
+  return result;
 }
