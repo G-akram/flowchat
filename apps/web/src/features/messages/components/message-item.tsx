@@ -13,6 +13,7 @@ interface MessageItemProps {
   onRemoveFailed: ((tempId: string) => void) | undefined;
   onToggleReaction: (messageId: string, emoji: string, hasReacted: boolean) => void;
   onUserClick?: ((userId: string) => void) | undefined;
+  isHighlighted?: boolean | undefined;
 }
 
 function formatTime(dateString: string): string {
@@ -27,6 +28,7 @@ export function MessageItem({
   onRemoveFailed,
   onToggleReaction,
   onUserClick,
+  isHighlighted = false,
 }: MessageItemProps): React.JSX.Element {
   const isFailed = isOptimisticMessage(message) && message.status === 'failed';
   const isSending = isOptimisticMessage(message) && message.status === 'sending';
@@ -69,10 +71,13 @@ export function MessageItem({
     />
   );
 
+  const highlightClass = isHighlighted ? 'bg-yellow-100 transition-colors duration-1000' : '';
+
   if (isCompact) {
     return (
       <div
-        className={`group/msg relative flex items-start gap-3 px-4 py-0.5 hover:bg-gray-50 ${isFailed ? 'bg-red-50' : ''}`}
+        id={`message-${message.id}`}
+        className={`group/msg relative flex items-start gap-3 px-4 py-0.5 hover:bg-gray-50 ${isFailed ? 'bg-red-50' : ''} ${highlightClass}`}
       >
         {addButton}
         {picker}
@@ -107,7 +112,8 @@ export function MessageItem({
 
   return (
     <div
-      className={`group/msg relative flex items-start gap-3 px-4 pt-2 pb-1 hover:bg-gray-50 ${isFailed ? 'bg-red-50' : ''}`}
+      id={`message-${message.id}`}
+      className={`group/msg relative flex items-start gap-3 px-4 pt-2 pb-1 hover:bg-gray-50 ${isFailed ? 'bg-red-50' : ''} ${highlightClass}`}
     >
       {addButton}
       {picker}

@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { useQueryClient, type InfiniteData } from '@tanstack/react-query';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useChannelSocket } from '@/hooks/use-channel-socket';
 import { useAuthStore } from '@/stores/auth-store';
 import { useOpenDm } from '@/features/dm/api/use-open-dm';
@@ -36,6 +36,8 @@ export function ChannelView({ channelId, channelName, isDm = false }: ChannelVie
   const navigate = useNavigate();
   const currentUser = useAuthStore((s) => s.user);
   const { mutateAsync: openDm } = useOpenDm();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const highlightMessageId = searchParams.get('highlight') ?? undefined;
 
   const handleRetry = useCallback(
     (failedTempId: string, content: string): void => {
@@ -113,6 +115,10 @@ export function ChannelView({ channelId, channelName, isDm = false }: ChannelVie
         onRemoveFailed={handleRemoveFailed}
         onToggleReaction={handleToggleReaction}
         onUserClick={handleUserClick}
+        highlightMessageId={highlightMessageId}
+        onHighlightComplete={(): void => {
+          setSearchParams({}, { replace: true });
+        }}
       />
 
       <TypingIndicator typingUsers={typingUsers} />

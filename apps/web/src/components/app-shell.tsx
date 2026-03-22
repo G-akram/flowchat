@@ -10,6 +10,7 @@ import { ProfileModal } from '@/features/users/components/profile-modal';
 import { useChannels } from '@/features/channels/api/use-channels';
 import { useDirectMessages } from '@/features/dm/api/use-direct-messages';
 import { NewDmModal } from '@/features/dm/components/new-dm-modal';
+import { SearchModal } from '@/features/search/components/search-modal';
 
 function ChannelPage(): React.JSX.Element {
   const { workspaceId, channelId } = useParams<{
@@ -73,6 +74,7 @@ function WorkspaceLayout(): React.JSX.Element {
 
       <ProfileModal />
       <NewDmModal />
+      <SearchModal />
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useCallback } from 'react';
+import React, { useRef, useEffect, useCallback, useState } from 'react';
 import { useMessages } from '../api/use-messages';
 import { MessageItem } from './message-item';
 import type { DisplayMessage } from '../types';
@@ -11,6 +11,8 @@ interface MessageListProps {
   onRemoveFailed: (tempId: string) => void;
   onToggleReaction: (messageId: string, emoji: string, hasReacted: boolean) => void;
   onUserClick?: ((userId: string) => void) | undefined;
+  highlightMessageId?: string | undefined;
+  onHighlightComplete?: (() => void) | undefined;
 }
 
 const SCROLL_THRESHOLD = 150;
@@ -33,6 +35,8 @@ export function MessageList({
   onRemoveFailed,
   onToggleReaction,
   onUserClick,
+  highlightMessageId,
+  onHighlightComplete,
 }: MessageListProps): React.JSX.Element {
   const {
     data,
@@ -108,6 +112,27 @@ export function MessageList({
     onClearNewMessageFlag();
   }, [scrollToBottom, onClearNewMessageFlag]);
 
+  const [activeHighlight, setActiveHighlight] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!highlightMessageId || messages.length === 0) return;
+
+    const element = document.getElementById(`message-${highlightMessageId}`);
+    if (!element) return;
+
+    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setActiveHighlight(highlightMessageId);
+
+    const timer = setTimeout(() => {
+      setActiveHighlight(null);
+      onHighlightComplete?.();
+    }, 2000);
+
+    return (): void => {
+      clearTimeout(timer);
+    };
+  }, [highlightMessageId, messages.length, onHighlightComplete]);
+
   if (isLoading) {
     return (
       <div className="flex flex-1 items-center justify-center">
@@ -165,6 +190,7 @@ export function MessageList({
                 onRemoveFailed={onRemoveFailed}
                 onToggleReaction={onToggleReaction}
                 onUserClick={onUserClick}
+                isHighlighted={activeHighlight === message.id}
               />
             );
           })}

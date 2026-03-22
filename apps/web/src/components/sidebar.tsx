@@ -48,6 +48,16 @@ export function Sidebar(): React.JSX.Element {
         <span className="truncate text-sm font-semibold text-gray-900">
           {isLoadingWorkspaces ? 'Loading…' : (activeWorkspace?.name ?? 'FlowChat')}
         </span>
+        <button
+          type="button"
+          className="flex h-7 w-7 items-center justify-center rounded text-gray-400 hover:bg-gray-200 hover:text-gray-600"
+          title="Search messages (Ctrl+K)"
+          onClick={() => openModal('search')}
+        >
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </button>
       </div>
 
       <div className="flex-1 overflow-y-auto p-3">

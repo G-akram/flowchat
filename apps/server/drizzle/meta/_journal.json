@@ -15,6 +15,13 @@
       "when": 1774137362553,
       "tag": "0001_graceful_exiles",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1774174984151,
+      "tag": "0002_hesitant_princess_powerful",
+      "breakpoints": true
     }
   ]
 }

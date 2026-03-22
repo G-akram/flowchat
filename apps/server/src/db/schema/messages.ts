@@ -1,4 +1,5 @@
 import { pgTable, uuid, text, timestamp, index } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 import { channels } from './channels';
 import { users } from './users';
 
@@ -20,6 +21,7 @@ export const messages = pgTable(
     index('messages_channel_id_idx').on(t.channelId),
     index('messages_user_id_idx').on(t.userId),
     index('messages_created_at_idx').on(t.createdAt),
+    index('messages_content_search_idx').using('gin', sql`to_tsvector('english', ${t.content})`),
   ]
 );
 
