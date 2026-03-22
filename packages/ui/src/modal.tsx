@@ -37,7 +37,7 @@ export function Modal({ open, onClose, children, className }: ModalProps): React
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
       onClick={handleBackdropClick}
     >
-      <div className={className ?? 'w-full max-w-md rounded-lg bg-white shadow-xl'}>
+      <div className={className ?? 'w-full max-w-md rounded-lg bg-popover text-popover-foreground shadow-xl'}>
         {children}
       </div>
     </div>

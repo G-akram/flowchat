@@ -16,9 +16,9 @@ const ROLE_LABELS: Record<string, string> = {
 };
 
 const ROLE_COLORS: Record<string, string> = {
-  owner: 'bg-amber-100 text-amber-800',
-  admin: 'bg-blue-100 text-blue-800',
-  member: 'bg-gray-100 text-gray-600',
+  owner: 'bg-amber-500/15 text-amber-600',
+  admin: 'bg-blue-500/15 text-blue-600',
+  member: 'bg-muted text-muted-foreground',
 };
 
 const ROLE_ORDER: Record<string, number> = {
@@ -100,16 +100,16 @@ export function ChannelMembersModal(): React.JSX.Element {
 
   return (
     <Modal open={activeModal === 'channelMembers' && Boolean(channelId)} onClose={handleClose}>
-      <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+      <div className="flex items-center justify-between border-b border-border px-6 py-4">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900">Channel members</h2>
-          <p className="text-sm text-gray-500">
+          <h2 className="text-lg font-semibold text-foreground">Channel members</h2>
+          <p className="text-sm text-muted-foreground">
             #{channel?.name} &middot; {members?.length ?? 0} members
           </p>
         </div>
         <button
           type="button"
-          className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+          className="rounded p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
           onClick={handleClose}
         >
           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -129,7 +129,7 @@ export function ChannelMembersModal(): React.JSX.Element {
 
       <div className="p-4">
         {errorMessage && (
-          <div className="mb-3 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+          <div className="mb-3 rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
             {errorMessage}
           </div>
         )}
@@ -137,11 +137,11 @@ export function ChannelMembersModal(): React.JSX.Element {
         {isLoading ? (
           <div className="space-y-2">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="h-12 animate-pulse rounded bg-gray-100" />
+              <div key={i} className="h-12 animate-pulse rounded bg-muted" />
             ))}
           </div>
         ) : filtered.length === 0 ? (
-          <p className="py-4 text-center text-sm text-gray-400">
+          <p className="py-4 text-center text-sm text-muted-foreground">
             {search ? 'No members match your search' : 'No members'}
           </p>
         ) : (
@@ -153,24 +153,24 @@ export function ChannelMembersModal(): React.JSX.Element {
               return (
                 <li
                   key={member.id}
-                  className={`flex items-center justify-between rounded-md px-3 py-2 ${isCurrentUser ? 'hover:bg-gray-50' : 'cursor-pointer hover:bg-gray-50'}`}
+                  className={`flex items-center justify-between rounded-md px-3 py-2 ${isCurrentUser ? 'hover:bg-accent' : 'cursor-pointer hover:bg-accent'}`}
                   onClick={() => handleMemberClick(member.id)}
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <PresenceDot userId={member.id} size="sm" />
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="truncate text-sm font-medium text-gray-900">
+                        <span className="truncate text-sm font-medium text-foreground">
                           {member.displayName}
                         </span>
                         {isCurrentUser && (
-                          <span className="shrink-0 text-xs text-gray-400">(you)</span>
+                          <span className="shrink-0 text-xs text-muted-foreground">(you)</span>
                         )}
                         <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${ROLE_COLORS[member.role] ?? ROLE_COLORS['member']}`}>
                           {ROLE_LABELS[member.role] ?? member.role}
                         </span>
                       </div>
-                      <span className="text-xs text-gray-400">@{member.username}</span>
+                      <span className="text-xs text-muted-foreground">@{member.username}</span>
                     </div>
                   </div>
                   {showKick && (
@@ -179,7 +179,7 @@ export function ChannelMembersModal(): React.JSX.Element {
                       variant="ghost"
                       isLoading={isKicking}
                       onClick={(e) => handleKick(e, member.id, member.displayName)}
-                      className="shrink-0 text-red-500 hover:bg-red-50 hover:text-red-600"
+                      className="shrink-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
                     >
                       Remove
                     </Button>
@@ -191,7 +191,7 @@ export function ChannelMembersModal(): React.JSX.Element {
         )}
       </div>
 
-      <div className="border-t border-gray-200 px-6 py-3">
+      <div className="border-t border-border px-6 py-3">
         <div className="flex justify-end">
           <Button variant="outline" onClick={handleClose}>
             Done

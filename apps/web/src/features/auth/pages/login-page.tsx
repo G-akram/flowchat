@@ -43,17 +43,17 @@ export function LoginPage(): React.JSX.Element {
       : null;
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50">
+    <div className="flex min-h-screen items-center justify-center bg-background">
       <div className="w-full max-w-md space-y-4">
-        <div className="rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
+        <div className="rounded-xl border border-border bg-card p-8 shadow-sm">
           <div className="mb-6">
-            <h1 className="text-2xl font-bold text-gray-900">Sign in to FlowChat</h1>
-            <p className="mt-1 text-sm text-gray-500">Enter your credentials to continue</p>
+            <h1 className="text-2xl font-bold text-foreground">Sign in to FlowChat</h1>
+            <p className="mt-1 text-sm text-muted-foreground">Enter your credentials to continue</p>
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-4">
             <div>
-              <label htmlFor="email" className="mb-1 block text-sm font-medium text-gray-700">
+              <label htmlFor="email" className="mb-1 block text-sm font-medium text-foreground">
                 Email
               </label>
               <Input
@@ -67,7 +67,7 @@ export function LoginPage(): React.JSX.Element {
             </div>
 
             <div>
-              <label htmlFor="password" className="mb-1 block text-sm font-medium text-gray-700">
+              <label htmlFor="password" className="mb-1 block text-sm font-medium text-foreground">
                 Password
               </label>
               <Input
@@ -81,7 +81,7 @@ export function LoginPage(): React.JSX.Element {
             </div>
 
             {serverError ? (
-              <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{serverError}</p>
+              <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">{serverError}</p>
             ) : null}
 
             <Button type="submit" isLoading={isPending} className="mt-2 w-full">
@@ -90,9 +90,9 @@ export function LoginPage(): React.JSX.Element {
           </form>
         </div>
 
-        <p className="text-center text-sm text-gray-600">
+        <p className="text-center text-sm text-muted-foreground">
           No account?{' '}
-          <Link to="/register" className="font-medium text-indigo-600 hover:underline">
+          <Link to="/register" className="font-medium text-primary hover:underline">
             Sign up
           </Link>
         </p>

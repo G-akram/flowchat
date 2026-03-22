@@ -4,6 +4,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
 import { queryClient } from './lib/query-client';
 import { App } from './App';
+import { ColorCustomizer } from './components/color-customizer';
 import './index.css';
 
 const rootElement = document.getElementById('root');
@@ -16,13 +17,14 @@ ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <App />
+      {import.meta.env.DEV && <ColorCustomizer />}
       <Toaster
         position="bottom-right"
         closeButton
         expand
         visibleToasts={4}
         toastOptions={{
-          className: 'border border-gray-200 shadow-xl',
+          className: 'border border-border shadow-xl',
           style: {
             fontFamily: 'inherit',
             fontSize: '14px',

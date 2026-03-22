@@ -52,11 +52,11 @@ export function ProfileModal(): React.JSX.Element | null {
   return (
     <Modal open={activeModal === 'editProfile'} onClose={closeModal}>
       <div className="p-6">
-        <h2 className="text-lg font-semibold text-gray-900">Edit Profile</h2>
+        <h2 className="text-lg font-semibold text-foreground">Edit Profile</h2>
 
         <form onSubmit={handleSubmit(onSubmit)} className="mt-4 space-y-4">
           <div>
-            <label htmlFor="displayName" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="displayName" className="block text-sm font-medium text-foreground">
               Display Name
             </label>
             <div className="mt-1">
@@ -69,7 +69,7 @@ export function ProfileModal(): React.JSX.Element | null {
           </div>
 
           <div>
-            <label htmlFor="avatarUrl" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="avatarUrl" className="block text-sm font-medium text-foreground">
               Avatar URL
             </label>
             <div className="mt-1">
@@ -80,7 +80,7 @@ export function ProfileModal(): React.JSX.Element | null {
                 error={errors.avatarUrl?.message}
               />
             </div>
-            <p className="mt-1 text-xs text-gray-400">
+            <p className="mt-1 text-xs text-muted-foreground">
               Paste an image URL for now. File upload coming soon.
             </p>
           </div>

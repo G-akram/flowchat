@@ -82,16 +82,16 @@ export function AddChannelMembersModal(): React.JSX.Element {
 
   return (
     <Modal open={activeModal === 'addChannelMembers' && Boolean(channelId)} onClose={handleClose}>
-      <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+      <div className="flex items-center justify-between border-b border-border px-6 py-4">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900">Add members</h2>
-          <p className="text-sm text-gray-500">
+          <h2 className="text-lg font-semibold text-foreground">Add members</h2>
+          <p className="text-sm text-muted-foreground">
             Add workspace members to #{modalData?.channelName}
           </p>
         </div>
         <button
           type="button"
-          className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+          className="rounded p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
           onClick={handleClose}
         >
           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -111,18 +111,18 @@ export function AddChannelMembersModal(): React.JSX.Element {
 
       <div className="p-4">
         {successMessage && (
-          <div className="mb-3 rounded-md bg-green-50 px-3 py-2 text-sm text-green-700">
+          <div className="mb-3 rounded-md bg-emerald-500/10 px-3 py-2 text-sm text-emerald-600">
             {successMessage}
           </div>
         )}
         {errorMessage && (
-          <div className="mb-3 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+          <div className="mb-3 rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
             {errorMessage}
           </div>
         )}
 
         {nonMembers.length === 0 ? (
-          <p className="py-4 text-center text-sm text-gray-400">
+          <p className="py-4 text-center text-sm text-muted-foreground">
             {search ? 'No members match your search' : 'All workspace members are already in this channel'}
           </p>
         ) : (
@@ -133,17 +133,17 @@ export function AddChannelMembersModal(): React.JSX.Element {
               return (
                 <li
                   key={member.id}
-                  className={`flex items-center justify-between rounded-md px-3 py-2 ${isCurrentUser ? 'hover:bg-gray-50' : 'cursor-pointer hover:bg-gray-50'}`}
+                  className={`flex items-center justify-between rounded-md px-3 py-2 ${isCurrentUser ? 'hover:bg-accent' : 'cursor-pointer hover:bg-accent'}`}
                   onClick={() => handleMemberClick(member.id)}
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <PresenceDot userId={member.id} size="sm" />
                     <div className="min-w-0">
-                      <span className="truncate text-sm font-medium text-gray-900">
+                      <span className="truncate text-sm font-medium text-foreground">
                         {member.displayName}
                       </span>
                       <div>
-                        <span className="text-xs text-gray-400">@{member.username}</span>
+                        <span className="text-xs text-muted-foreground">@{member.username}</span>
                       </div>
                     </div>
                   </div>
@@ -163,7 +163,7 @@ export function AddChannelMembersModal(): React.JSX.Element {
         )}
       </div>
 
-      <div className="border-t border-gray-200 px-6 py-3">
+      <div className="border-t border-border px-6 py-3">
         <div className="flex justify-end">
           <Button variant="outline" onClick={handleClose}>
             Done

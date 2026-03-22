@@ -99,12 +99,12 @@ export function WorkspaceSettingsModal(): React.JSX.Element | null {
   const isOpen = activeModal === 'workspaceSettings' && Boolean(workspace) && Boolean(workspaceId);
 
   return (
-    <Modal open={isOpen} onClose={closeModal} className="w-full max-w-lg rounded-lg bg-white shadow-xl">
-        <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-          <h2 className="text-lg font-semibold text-gray-900">Workspace settings</h2>
+    <Modal open={isOpen} onClose={closeModal} className="w-full max-w-lg rounded-lg bg-popover text-popover-foreground shadow-xl">
+        <div className="flex items-center justify-between border-b border-border px-6 py-4">
+          <h2 className="text-lg font-semibold text-foreground">Workspace settings</h2>
           <button
             type="button"
-            className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+            className="rounded p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
             onClick={closeModal}
           >
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -115,14 +115,14 @@ export function WorkspaceSettingsModal(): React.JSX.Element | null {
 
         <div className="space-y-6 p-6">
           {errorMessage && (
-            <div className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+            <div className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
               {errorMessage}
             </div>
           )}
 
           {isOwner && (
             <section>
-              <h3 className="text-sm font-medium text-gray-900">Rename workspace</h3>
+              <h3 className="text-sm font-medium text-foreground">Rename workspace</h3>
               <form onSubmit={handleSubmit(onRename)} className="mt-2 flex gap-2">
                 <div className="flex-1">
                   <Input
@@ -138,8 +138,8 @@ export function WorkspaceSettingsModal(): React.JSX.Element | null {
           )}
 
           <section>
-            <h3 className="text-sm font-medium text-gray-900">Invite members</h3>
-            <p className="mt-1 text-xs text-gray-500">Add teammates to this workspace.</p>
+            <h3 className="text-sm font-medium text-foreground">Invite members</h3>
+            <p className="mt-1 text-xs text-muted-foreground">Add teammates to this workspace.</p>
             <Button
               type="button"
               variant="outline"
@@ -155,9 +155,9 @@ export function WorkspaceSettingsModal(): React.JSX.Element | null {
           </section>
 
           {!isOwner && (
-            <section className="border-t border-gray-200 pt-4">
-              <h3 className="text-sm font-medium text-gray-900">Leave workspace</h3>
-              <p className="mt-1 text-xs text-gray-500">
+            <section className="border-t border-border pt-4">
+              <h3 className="text-sm font-medium text-foreground">Leave workspace</h3>
+              <p className="mt-1 text-xs text-muted-foreground">
                 You will lose access to all channels and messages in this workspace.
               </p>
               <Button
@@ -174,9 +174,9 @@ export function WorkspaceSettingsModal(): React.JSX.Element | null {
           )}
 
           {isOwner && workspace && (
-            <section className="border-t border-gray-200 pt-4">
-              <h3 className="text-sm font-medium text-red-600">Danger zone</h3>
-              <p className="mt-1 text-xs text-gray-500">
+            <section className="border-t border-border pt-4">
+              <h3 className="text-sm font-medium text-destructive">Danger zone</h3>
+              <p className="mt-1 text-xs text-muted-foreground">
                 This will permanently delete the workspace, all channels, and all messages. This action cannot be undone.
               </p>
               <div className="mt-2 space-y-2">

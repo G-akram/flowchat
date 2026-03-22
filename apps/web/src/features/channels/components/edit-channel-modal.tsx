@@ -82,11 +82,11 @@ export function EditChannelModal(): React.JSX.Element | null {
   return (
     <Modal open={activeModal === 'editChannel' && Boolean(modalData?.channelId)} onClose={handleClose}>
       <div className="p-6">
-        <h2 className="text-lg font-semibold text-gray-900">Edit channel</h2>
+        <h2 className="text-lg font-semibold text-foreground">Edit channel</h2>
 
         <form onSubmit={handleSubmit(onSubmit)} className="mt-4 space-y-4">
           <div>
-            <label htmlFor="edit-ch-name" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="edit-ch-name" className="block text-sm font-medium text-foreground">
               Channel name
             </label>
             <div className="mt-1">
@@ -100,8 +100,8 @@ export function EditChannelModal(): React.JSX.Element | null {
           </div>
 
           <div>
-            <label htmlFor="edit-ch-desc" className="block text-sm font-medium text-gray-700">
-              Description <span className="font-normal text-gray-400">(optional)</span>
+            <label htmlFor="edit-ch-desc" className="block text-sm font-medium text-foreground">
+              Description <span className="font-normal text-muted-foreground">(optional)</span>
             </label>
             <div className="mt-1">
               <Input

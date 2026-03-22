@@ -31,11 +31,11 @@ function SearchResult({
   return (
     <button
       type="button"
-      className="w-full rounded px-3 py-2 text-left hover:bg-gray-100"
+      className="w-full rounded px-3 py-2 text-left hover:bg-accent"
       onClick={onClick}
     >
-      <div className="flex items-center gap-2 text-xs text-gray-500">
-        <span className="font-medium text-gray-700">
+      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+        <span className="font-medium text-foreground">
           {result.channel.isDirectMessage
             ? `DM with ${result.user.displayName}`
             : `#${result.channel.name}`}
@@ -49,7 +49,7 @@ function SearchResult({
         <span>·</span>
         <span>{formatTimestamp(result.createdAt)}</span>
       </div>
-      <p className="mt-0.5 truncate text-sm text-gray-900">
+      <p className="mt-0.5 truncate text-sm text-foreground">
         {highlightMatch(result.content, query)}
       </p>
     </button>
@@ -122,12 +122,12 @@ export function SearchModal(): React.JSX.Element | null {
       onClick={closeModal}
     >
       <div
-        className="w-full max-w-lg rounded-lg bg-white shadow-xl"
+        className="w-full max-w-lg rounded-lg bg-popover shadow-xl"
         onClick={(event): void => event.stopPropagation()}
       >
-        <div className="flex items-center border-b border-gray-200 px-4">
+        <div className="flex items-center border-b border-border px-4">
           <svg
-            className="h-4 w-4 shrink-0 text-gray-400"
+            className="h-4 w-4 shrink-0 text-muted-foreground"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -142,7 +142,7 @@ export function SearchModal(): React.JSX.Element | null {
           <input
             ref={inputRef}
             type="text"
-            className="flex-1 border-0 bg-transparent px-3 py-3 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none"
+            className="flex-1 border-0 bg-transparent px-3 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
             placeholder="Search messages…"
             value={inputValue}
             onChange={(event): void => setInputValue(event.target.value)}
@@ -152,28 +152,28 @@ export function SearchModal(): React.JSX.Element | null {
               }
             }}
           />
-          <kbd className="hidden rounded border border-gray-200 px-1.5 py-0.5 text-xs text-gray-400 sm:inline-block">
+          <kbd className="hidden rounded border border-border px-1.5 py-0.5 text-xs text-muted-foreground sm:inline-block">
             Esc
           </kbd>
         </div>
 
         <div className="max-h-80 overflow-y-auto p-2">
           {debouncedQuery.trim().length === 0 ? (
-            <p className="p-4 text-center text-sm text-gray-400">
+            <p className="p-4 text-center text-sm text-muted-foreground">
               Type to search messages
             </p>
           ) : isLoading ? (
             <div className="space-y-2 p-2">
               {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="h-12 animate-pulse rounded bg-gray-100" />
+                <div key={i} className="h-12 animate-pulse rounded bg-muted" />
               ))}
             </div>
           ) : isError ? (
-            <p className="p-4 text-center text-sm text-red-500">
+            <p className="p-4 text-center text-sm text-destructive">
               Search failed. Please try again.
             </p>
           ) : results && results.length === 0 ? (
-            <p className="p-4 text-center text-sm text-gray-400">
+            <p className="p-4 text-center text-sm text-muted-foreground">
               No messages found
             </p>
           ) : (

@@ -58,14 +58,14 @@ export function CreateWorkspaceModal(): React.JSX.Element | null {
   return (
     <Modal open={activeModal === 'createWorkspace'} onClose={handleClose}>
       <div className="p-6">
-        <h2 className="text-lg font-semibold text-gray-900">Create a workspace</h2>
-        <p className="mt-1 text-sm text-gray-500">
+        <h2 className="text-lg font-semibold text-foreground">Create a workspace</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
           Workspaces are shared spaces for your team to communicate.
         </p>
 
         <form onSubmit={handleSubmit(onSubmit)} className="mt-4 space-y-4">
           <div>
-            <label htmlFor="ws-name" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="ws-name" className="block text-sm font-medium text-foreground">
               Workspace name
             </label>
             <div className="mt-1">

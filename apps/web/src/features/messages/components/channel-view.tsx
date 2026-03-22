@@ -81,7 +81,7 @@ function ChannelHeaderMenu({
     <div className="relative" ref={menuRef}>
       <button
         type="button"
-        className="flex h-7 w-7 items-center justify-center rounded text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+        className="flex h-7 w-7 items-center justify-center rounded text-muted-foreground hover:bg-accent hover:text-foreground"
         onClick={() => setIsOpen((prev) => !prev)}
         title="Channel options"
       >
@@ -91,10 +91,10 @@ function ChannelHeaderMenu({
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-full z-50 mt-1 w-48 rounded-lg border border-gray-200 bg-white py-1 shadow-lg">
+        <div className="absolute right-0 top-full z-50 mt-1 w-48 rounded-lg border border-border bg-popover py-1 shadow-lg">
           <button
             type="button"
-            className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
+            className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-popover-foreground hover:bg-accent"
             onClick={() => {
               setIsOpen(false);
               openModal('channelMembers', {
@@ -107,7 +107,7 @@ function ChannelHeaderMenu({
           </button>
           <button
             type="button"
-            className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
+            className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-popover-foreground hover:bg-accent"
             onClick={() => {
               setIsOpen(false);
               openModal('addChannelMembers', {
@@ -121,7 +121,7 @@ function ChannelHeaderMenu({
           {canManage && (
             <button
               type="button"
-              className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
+              className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-popover-foreground hover:bg-accent"
               onClick={() => {
                 setIsOpen(false);
                 openModal('editChannel', {
@@ -137,7 +137,7 @@ function ChannelHeaderMenu({
           {!isGeneral && (
             <button
               type="button"
-              className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
+              className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-popover-foreground hover:bg-accent"
               onClick={() => {
                 setIsOpen(false);
                 if (workspaceId) {
@@ -151,7 +151,7 @@ function ChannelHeaderMenu({
           {canManage && !isGeneral && (
             <button
               type="button"
-              className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50"
+              className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-destructive hover:bg-destructive/10"
               onClick={() => {
                 setIsOpen(false);
                 if (workspaceId && window.confirm(`Delete #${channelName}? This cannot be undone.`)) {
@@ -251,13 +251,13 @@ export function ChannelView({ channelId, channelName, isDm = false }: ChannelVie
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex h-12 shrink-0 items-center justify-between border-b border-gray-200 px-4">
+      <div className="flex h-12 shrink-0 items-center justify-between border-b border-border px-4">
         <div className="min-w-0">
-          <h2 className="truncate text-sm font-semibold text-gray-900">
+          <h2 className="truncate text-sm font-semibold text-foreground">
             {isDm ? '' : '# '}{channelName ?? (isDm ? 'Direct Message' : 'channel')}
           </h2>
           {!isDm && channel?.description && (
-            <p className="truncate text-xs text-gray-400">{channel.description}</p>
+            <p className="truncate text-xs text-muted-foreground">{channel.description}</p>
           )}
         </div>
         {!isDm && channel && (

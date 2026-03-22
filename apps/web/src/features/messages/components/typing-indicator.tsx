@@ -26,7 +26,7 @@ export function TypingIndicator({ typingUsers }: TypingIndicatorProps): React.JS
 
   return (
     <div className="px-4 py-1">
-      <span className="text-xs text-gray-500">
+      <span className="text-xs text-muted-foreground">
         {formatTypingText(typingUsers)}
       </span>
     </div>

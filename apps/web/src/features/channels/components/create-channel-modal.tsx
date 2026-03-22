@@ -69,14 +69,14 @@ export function CreateChannelModal(): React.JSX.Element | null {
   return (
     <Modal open={activeModal === 'createChannel'} onClose={handleClose}>
       <div className="p-6">
-        <h2 className="text-lg font-semibold text-gray-900">Create a channel</h2>
-        <p className="mt-1 text-sm text-gray-500">
+        <h2 className="text-lg font-semibold text-foreground">Create a channel</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
           Channels are where your team communicates about topics.
         </p>
 
         <form onSubmit={handleSubmit(onSubmit)} className="mt-4 space-y-4">
           <div>
-            <label htmlFor="ch-name" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="ch-name" className="block text-sm font-medium text-foreground">
               Channel name
             </label>
             <div className="mt-1">
@@ -91,8 +91,8 @@ export function CreateChannelModal(): React.JSX.Element | null {
           </div>
 
           <div>
-            <label htmlFor="ch-desc" className="block text-sm font-medium text-gray-700">
-              Description <span className="font-normal text-gray-400">(optional)</span>
+            <label htmlFor="ch-desc" className="block text-sm font-medium text-foreground">
+              Description <span className="font-normal text-muted-foreground">(optional)</span>
             </label>
             <div className="mt-1">
               <Input
@@ -108,10 +108,10 @@ export function CreateChannelModal(): React.JSX.Element | null {
             <input
               type="checkbox"
               id="ch-private"
-              className="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-900"
+              className="h-4 w-4 rounded border-input text-primary focus:ring-ring"
               {...register('isPrivate')}
             />
-            <label htmlFor="ch-private" className="text-sm text-gray-700">
+            <label htmlFor="ch-private" className="text-sm text-foreground">
               Make private
             </label>
           </div>

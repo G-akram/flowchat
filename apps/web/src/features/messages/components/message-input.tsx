@@ -191,7 +191,7 @@ export function MessageInput({ channelId }: MessageInputProps): React.JSX.Elemen
 
   return (
     <div
-      className={`border-t bg-white px-4 py-3 ${isDragOver ? 'border-indigo-400 bg-indigo-50' : 'border-gray-200'}`}
+      className={`border-t bg-background px-4 py-3 ${isDragOver ? 'border-primary bg-primary/5' : 'border-border'}`}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -201,7 +201,7 @@ export function MessageInput({ channelId }: MessageInputProps): React.JSX.Elemen
       <div className="flex items-end gap-2">
         <button
           type="button"
-          className="mb-1.5 flex h-8 w-8 shrink-0 items-center justify-center rounded text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+          className="mb-1.5 flex h-8 w-8 shrink-0 items-center justify-center rounded text-muted-foreground hover:bg-accent hover:text-foreground"
           onClick={handlePaperclipClick}
           title="Attach file"
         >
@@ -237,7 +237,7 @@ export function MessageInput({ channelId }: MessageInputProps): React.JSX.Elemen
           onBlur={handleBlur}
           placeholder={isDragOver ? 'Drop files here...' : 'Type a message...'}
           rows={1}
-          className="flex-1 resize-none rounded-lg border border-gray-300 px-3 py-2 text-sm leading-5 text-gray-900 placeholder-gray-400 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+          className="flex-1 resize-none rounded-lg border border-input bg-background px-3 py-2 text-sm leading-5 text-foreground placeholder-muted-foreground outline-none focus:border-ring focus:ring-1 focus:ring-ring"
           style={{ minHeight: `${LINE_HEIGHT + PADDING}px` }}
         />
         <Button
@@ -250,8 +250,8 @@ export function MessageInput({ channelId }: MessageInputProps): React.JSX.Elemen
       </div>
 
       {isDragOver && (
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-lg border-2 border-dashed border-indigo-400 bg-indigo-50/80">
-          <p className="text-sm font-medium text-indigo-600">Drop files to upload</p>
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-lg border-2 border-dashed border-primary bg-primary/5">
+          <p className="text-sm font-medium text-primary">Drop files to upload</p>
         </div>
       )}
     </div>

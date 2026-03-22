@@ -44,7 +44,7 @@ export function Avatar({ src, alt, size = 'md', className }: AvatarProps): React
   return (
     <div
       className={cn(
-        'flex items-center justify-center rounded-full bg-indigo-500 font-semibold text-white',
+        'flex items-center justify-center rounded-full bg-primary font-semibold text-primary-foreground',
         sizeClass,
         className
       )}

@@ -35,7 +35,7 @@ function ChannelPage(): React.JSX.Element {
   if (!channelId) {
     return (
       <div className="flex h-full items-center justify-center">
-        <p className="text-sm text-gray-400">Channel not found</p>
+        <p className="text-sm text-muted-foreground">Channel not found</p>
       </div>
     );
   }
@@ -56,10 +56,10 @@ function WelcomePage(): React.JSX.Element {
   return (
     <div className="flex h-full items-center justify-center">
       <div className="text-center">
-        <h2 className="text-lg font-semibold text-gray-900">
+        <h2 className="text-lg font-semibold text-foreground">
           Welcome, {user?.displayName ?? 'User'}!
         </h2>
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-1 text-sm text-muted-foreground">
           Select a channel to start chatting
         </p>
       </div>
@@ -75,7 +75,7 @@ function WorkspaceLayout(): React.JSX.Element {
   useWorkspaceSocket(workspaceId);
 
   return (
-    <div className="flex h-screen bg-white">
+    <div className="flex h-screen bg-background text-foreground">
       <Sidebar />
 
       <main className="flex flex-1 flex-col overflow-hidden">
@@ -108,7 +108,7 @@ function WorkspaceRedirect(): React.JSX.Element {
   if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <p className="text-sm text-gray-400">Loading workspaces\u2026</p>
+        <p className="text-sm text-muted-foreground">Loading workspaces\u2026</p>
       </div>
     );
   }
@@ -122,8 +122,8 @@ function WorkspaceRedirect(): React.JSX.Element {
   return (
     <div className="flex h-screen items-center justify-center">
       <div className="text-center">
-        <h2 className="text-lg font-semibold text-gray-900">Welcome to FlowChat</h2>
-        <p className="mt-1 text-sm text-gray-500">
+        <h2 className="text-lg font-semibold text-foreground">Welcome to FlowChat</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
           Create a workspace to get started
         </p>
         <Button

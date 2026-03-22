@@ -16,7 +16,7 @@ const SIZE_CLASSES: Record<DotSize, string> = {
 const STATUS_CLASSES: Record<string, string> = {
   online: 'bg-green-500',
   away: 'bg-yellow-500',
-  offline: 'bg-gray-300',
+  offline: 'bg-muted-foreground/40',
 };
 
 export function PresenceDot({ userId, size = 'sm' }: PresenceDotProps): React.JSX.Element {

@@ -40,14 +40,14 @@ export function EmojiPicker({ onSelect, onClose }: EmojiPickerProps): React.JSX.
   return (
     <div
       ref={containerRef}
-      className="absolute right-2 top-0 z-20 w-56 -translate-y-full rounded-lg border border-gray-200 bg-white p-2 shadow-xl"
+      className="absolute right-2 top-0 z-20 w-56 -translate-y-full rounded-lg border border-border bg-popover p-2 shadow-xl"
     >
       <div className="grid grid-cols-8 gap-0.5">
         {COMMON_EMOJIS.map((emoji) => (
           <button
             key={emoji}
             type="button"
-            className="flex h-7 w-7 items-center justify-center rounded text-base transition-colors hover:bg-gray-100"
+            className="flex h-7 w-7 items-center justify-center rounded text-base transition-colors hover:bg-accent"
             onClick={() => {
               onSelect(emoji);
               onClose();

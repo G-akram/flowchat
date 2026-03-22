@@ -65,20 +65,20 @@ export function InviteMemberModal(): React.JSX.Element | null {
   return (
     <Modal open={activeModal === 'inviteMembers'} onClose={handleClose}>
       <div className="p-6">
-        <h2 className="text-lg font-semibold text-gray-900">Invite a member</h2>
-        <p className="mt-1 text-sm text-gray-500">
+        <h2 className="text-lg font-semibold text-foreground">Invite a member</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
           Enter the email address of the person you want to invite.
         </p>
 
         {successMessage && (
-          <div className="mt-3 rounded-md bg-green-50 px-3 py-2 text-sm text-green-700">
+          <div className="mt-3 rounded-md bg-emerald-500/10 px-3 py-2 text-sm text-emerald-600">
             {successMessage}
           </div>
         )}
 
         <form onSubmit={handleSubmit(onSubmit)} className="mt-4 space-y-4">
           <div>
-            <label htmlFor="invite-email" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="invite-email" className="block text-sm font-medium text-foreground">
               Email address
             </label>
             <div className="mt-1">

@@ -33,7 +33,7 @@ export function MessageAttachments({ attachments }: MessageAttachmentsProps): Re
             href={attachment.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="block overflow-hidden rounded-lg border border-gray-200"
+            className="block overflow-hidden rounded-lg border border-border"
           >
             <img
               src={attachment.url}
@@ -48,16 +48,16 @@ export function MessageAttachments({ attachments }: MessageAttachmentsProps): Re
             href={attachment.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 transition-colors hover:bg-gray-100"
+            className="flex items-center gap-3 rounded-lg border border-border bg-muted px-3 py-2 transition-colors hover:bg-accent"
           >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-indigo-100 text-xs font-bold text-indigo-600">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-primary/15 text-xs font-bold text-primary">
               {getFileIcon(attachment.mimeType)}
             </div>
             <div className="min-w-0">
-              <p className="truncate text-sm font-medium text-indigo-600 hover:underline">
+              <p className="truncate text-sm font-medium text-primary hover:underline">
                 {attachment.fileName}
               </p>
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-muted-foreground">
                 {formatFileSize(attachment.fileSize)}
               </p>
             </div>

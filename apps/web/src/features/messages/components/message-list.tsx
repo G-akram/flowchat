@@ -136,7 +136,7 @@ export function MessageList({
   if (isLoading) {
     return (
       <div className="flex flex-1 items-center justify-center">
-        <div className="text-sm text-gray-500">Loading messages...</div>
+        <div className="text-sm text-muted-foreground">Loading messages...</div>
       </div>
     );
   }
@@ -144,7 +144,7 @@ export function MessageList({
   if (isError) {
     return (
       <div className="flex flex-1 items-center justify-center">
-        <div className="text-sm text-red-500">Failed to load messages</div>
+        <div className="text-sm text-destructive">Failed to load messages</div>
       </div>
     );
   }
@@ -158,19 +158,19 @@ export function MessageList({
       >
         {isFetchingNextPage && (
           <div className="py-3 text-center">
-            <span className="text-xs text-gray-400">Loading older messages...</span>
+            <span className="text-xs text-muted-foreground">Loading older messages...</span>
           </div>
         )}
 
         {!hasNextPage && messages.length > 0 && (
           <div className="py-4 text-center">
-            <span className="text-xs text-gray-400">Beginning of conversation</span>
+            <span className="text-xs text-muted-foreground">Beginning of conversation</span>
           </div>
         )}
 
         {messages.length === 0 && (
           <div className="flex h-full items-center justify-center">
-            <p className="text-sm text-gray-400">No messages yet. Send the first one!</p>
+            <p className="text-sm text-muted-foreground">No messages yet. Send the first one!</p>
           </div>
         )}
 
@@ -200,7 +200,7 @@ export function MessageList({
       {newMessageFlag && !isNearBottom.current && (
         <button
           type="button"
-          className="absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-indigo-600 px-4 py-1.5 text-xs font-medium text-white shadow-lg transition-colors hover:bg-indigo-700"
+          className="absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-4 py-1.5 text-xs font-medium text-primary-foreground shadow-lg transition-colors hover:bg-primary/90"
           onClick={handleNewMessagesClick}
         >
           ↓ New messages

@@ -24,7 +24,7 @@ export function FilePreviewList({ uploads, onRemove }: FilePreviewListProps): Re
         return (
           <div
             key={`${upload.file.name}-${index}`}
-            className="relative flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 p-2"
+            className="relative flex items-center gap-2 rounded-lg border border-border bg-muted p-2"
           >
             {previewUrl ? (
               <img
@@ -33,34 +33,34 @@ export function FilePreviewList({ uploads, onRemove }: FilePreviewListProps): Re
                 className="h-12 w-12 rounded object-cover"
               />
             ) : (
-              <div className="flex h-12 w-12 items-center justify-center rounded bg-gray-200 text-xs text-gray-500">
+              <div className="flex h-12 w-12 items-center justify-center rounded bg-accent text-xs text-muted-foreground">
                 {upload.file.name.split('.').pop()?.toUpperCase() ?? 'FILE'}
               </div>
             )}
 
             <div className="min-w-0 max-w-[120px]">
-              <p className="truncate text-xs font-medium text-gray-700">
+              <p className="truncate text-xs font-medium text-foreground">
                 {upload.file.name}
               </p>
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-muted-foreground">
                 {formatFileSize(upload.file.size)}
               </p>
               {upload.status === 'uploading' && upload.progress > 0 && (
-                <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-gray-200">
+                <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-accent">
                   <div
-                    className="h-full rounded-full bg-indigo-500 transition-all duration-200"
+                    className="h-full rounded-full bg-primary transition-all duration-200"
                     style={{ width: `${upload.progress}%` }}
                   />
                 </div>
               )}
               {upload.status === 'error' && (
-                <p className="text-xs text-red-500">Failed</p>
+                <p className="text-xs text-destructive">Failed</p>
               )}
             </div>
 
             <button
               type="button"
-              className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-gray-600 text-xs text-white hover:bg-gray-800"
+              className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-secondary-foreground text-xs text-secondary hover:opacity-80"
               onClick={() => onRemove(index)}
             >
               &times;

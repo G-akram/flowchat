@@ -20,8 +20,8 @@ export function ReactionBar({
           type="button"
           className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs transition-colors ${
             reaction.hasReacted
-              ? 'border-indigo-300 bg-indigo-50 text-indigo-700 hover:bg-indigo-100'
-              : 'border-gray-200 bg-gray-50 text-gray-600 hover:border-gray-300 hover:bg-gray-100'
+              ? 'border-primary/40 bg-primary/10 text-primary hover:bg-primary/20'
+              : 'border-border bg-muted text-muted-foreground hover:border-border hover:bg-accent'
           }`}
           onClick={() => onToggle(reaction.emoji, reaction.hasReacted)}
         >
