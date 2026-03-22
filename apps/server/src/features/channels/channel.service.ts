@@ -11,6 +11,8 @@ import {
   deleteChannel as deleteChannelInDb,
   removeChannelMember,
   findChannelMemberProfiles,
+  findNextChannelOwner,
+  updateChannelCreator,
   type ChannelMemberProfile,
 } from './channel.repository';
 import type { DbChannel } from '../../db/schema/channels';
@@ -222,6 +224,14 @@ export async function leave(
 
   if (!member) {
     throw new AppError('NOT_A_MEMBER', 'You are not a member of this channel', 403);
+  }
+
+  if (channel.createdById === userId) {
+    const nextOwner = await findNextChannelOwner(channelId, workspaceId, userId);
+
+    if (nextOwner) {
+      await updateChannelCreator(channelId, nextOwner.userId);
+    }
   }
 
   await removeChannelMember(channelId, userId);

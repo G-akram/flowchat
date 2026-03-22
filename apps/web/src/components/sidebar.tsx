@@ -5,9 +5,12 @@ import { useLogout } from '@/features/auth/api/use-logout';
 import { useWorkspaces } from '@/features/workspaces/api/use-workspaces';
 import { useChannels } from '@/features/channels/api/use-channels';
 import { useDirectMessages } from '@/features/dm/api/use-direct-messages';
+import { useNotifications } from '@/features/notifications/api/use-notifications';
+import { NotificationPanel } from '@/features/notifications/components/notification-panel';
 import { Button } from '@flowchat/ui';
 import { PresenceDot } from '@/components/presence-dot';
 import { useUiStore } from '@/stores/ui-store';
+import type { Channel } from '@flowchat/types';
 
 function ChannelListSkeleton(): React.JSX.Element {
   return (
@@ -25,6 +28,154 @@ function ChannelListSkeleton(): React.JSX.Element {
 function ChannelListEmpty(): React.JSX.Element {
   return (
     <p className="mt-2 text-xs text-gray-400">No channels yet</p>
+  );
+}
+
+function ChannelContextMenu({
+  channel,
+  onClose,
+}: {
+  channel: Channel;
+  onClose: () => void;
+}): React.JSX.Element {
+  const openModal = useUiStore((s) => s.openModal);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent): void {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        onClose();
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [onClose]);
+
+  return (
+    <div
+      ref={menuRef}
+      className="absolute right-0 top-full z-50 mt-1 w-48 rounded-lg border border-gray-200 bg-white py-1 shadow-lg"
+    >
+      <button
+        type="button"
+        className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm text-gray-700 hover:bg-gray-50"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onClose();
+          openModal('editChannel', {
+            channelId: channel.id,
+            channelName: channel.name,
+            channelDescription: channel.description,
+          });
+        }}
+      >
+        <svg className="h-3.5 w-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+        </svg>
+        Edit channel
+      </button>
+      <button
+        type="button"
+        className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm text-gray-700 hover:bg-gray-50"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onClose();
+          openModal('channelMembers', { channelId: channel.id });
+        }}
+      >
+        <svg className="h-3.5 w-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+        Members
+      </button>
+      <button
+        type="button"
+        className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm text-gray-700 hover:bg-gray-50"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onClose();
+          openModal('addChannelMembers', { channelId: channel.id });
+        }}
+      >
+        <svg className="h-3.5 w-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+        </svg>
+        Add members
+      </button>
+      <div className="my-1 border-t border-gray-100" />
+      <button
+        type="button"
+        className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm text-gray-700 hover:bg-gray-50"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onClose();
+          openModal('channelSettings', { channelId: channel.id });
+        }}
+      >
+        <svg className="h-3.5 w-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+        Channel settings
+      </button>
+    </div>
+  );
+}
+
+function ChannelItem({
+  channel,
+  isActive,
+  workspaceId,
+}: {
+  channel: Channel;
+  isActive: boolean;
+  workspaceId: string;
+}): React.JSX.Element {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  return (
+    <div className="group relative">
+      <Link
+        to={`/app/${workspaceId}/${channel.id}`}
+        className={`flex items-center justify-between rounded px-2 py-1.5 text-sm ${
+          isActive
+            ? 'bg-gray-200 font-medium text-gray-900'
+            : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+        }`}
+      >
+        <span className="min-w-0 truncate">
+          <span className="mr-1 text-gray-400">#</span>
+          {channel.name}
+        </span>
+        <button
+          type="button"
+          className={`flex h-5 w-5 shrink-0 items-center justify-center rounded text-gray-400 hover:bg-gray-300 hover:text-gray-600 ${
+            isMenuOpen ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+          }`}
+          title="Channel options"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setIsMenuOpen((prev) => !prev);
+          }}
+        >
+          <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+          </svg>
+        </button>
+      </Link>
+      {isMenuOpen && (
+        <ChannelContextMenu
+          channel={channel}
+          onClose={() => setIsMenuOpen(false)}
+        />
+      )}
+    </div>
   );
 }
 
@@ -133,7 +284,9 @@ export function Sidebar(): React.JSX.Element {
   const { workspaces, isLoading: isLoadingWorkspaces } = useWorkspaces();
   const { channels, isLoading: isLoadingChannels } = useChannels(workspaceId);
   const { dms, isLoading: isLoadingDms } = useDirectMessages(workspaceId);
+  const { unreadCount } = useNotifications();
   const [isWsMenuOpen, setIsWsMenuOpen] = useState(false);
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
   const wsMenuRef = useRef<HTMLDivElement>(null);
 
   const activeWorkspace = workspaces?.find((w) => w.id === workspaceId);
@@ -167,16 +320,36 @@ export function Sidebar(): React.JSX.Element {
             <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
           </svg>
         </button>
-        <button
-          type="button"
-          className="flex h-7 w-7 items-center justify-center rounded text-gray-400 hover:bg-gray-200 hover:text-gray-600"
-          title="Search messages (Ctrl+K)"
-          onClick={() => openModal('search')}
-        >
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-        </button>
+        <div className="flex items-center gap-0.5">
+          <div className="relative">
+            <button
+              type="button"
+              className="flex h-7 w-7 items-center justify-center rounded text-gray-400 hover:bg-gray-200 hover:text-gray-600"
+              title="Notifications"
+              onClick={() => setIsNotifOpen((prev) => !prev)}
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+              </svg>
+              {unreadCount > 0 && (
+                <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </span>
+              )}
+            </button>
+            <NotificationPanel isOpen={isNotifOpen} onClose={() => setIsNotifOpen(false)} />
+          </div>
+          <button
+            type="button"
+            className="flex h-7 w-7 items-center justify-center rounded text-gray-400 hover:bg-gray-200 hover:text-gray-600"
+            title="Search messages (Ctrl+K)"
+            onClick={() => openModal('search')}
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </button>
+        </div>
         {isWsMenuOpen && <WorkspaceMenu onClose={() => setIsWsMenuOpen(false)} />}
       </div>
 
@@ -201,23 +374,14 @@ export function Sidebar(): React.JSX.Element {
           <ChannelListEmpty />
         ) : (
           <nav className="mt-2 space-y-0.5">
-            {channels.map((channel) => {
-              const isActive = channel.id === channelId;
-              return (
-                <Link
-                  key={channel.id}
-                  to={`/app/${workspaceId}/${channel.id}`}
-                  className={`block rounded px-2 py-1.5 text-sm ${
-                    isActive
-                      ? 'bg-gray-200 font-medium text-gray-900'
-                      : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-                  }`}
-                >
-                  <span className="mr-1 text-gray-400">#</span>
-                  {channel.name}
-                </Link>
-              );
-            })}
+            {channels.map((channel) => (
+              <ChannelItem
+                key={channel.id}
+                channel={channel}
+                isActive={channel.id === channelId}
+                workspaceId={workspaceId ?? ''}
+              />
+            ))}
           </nav>
         )}
 

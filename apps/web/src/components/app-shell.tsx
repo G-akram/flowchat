@@ -6,6 +6,7 @@ import { ChannelView } from '@/features/messages/components/channel-view';
 import { Sidebar } from '@/components/sidebar';
 import { usePresence } from '@/hooks/use-presence';
 import { useHeartbeat } from '@/hooks/use-heartbeat';
+import { useWorkspaceSocket } from '@/hooks/use-workspace-socket';
 import { ProfileModal } from '@/features/users/components/profile-modal';
 import { useChannels } from '@/features/channels/api/use-channels';
 import { useDirectMessages } from '@/features/dm/api/use-direct-messages';
@@ -19,6 +20,7 @@ import { EditChannelModal } from '@/features/channels/components/edit-channel-mo
 import { AddChannelMembersModal } from '@/features/channels/components/add-channel-members-modal';
 import { WorkspaceMembersModal } from '@/features/workspaces/components/workspace-members-modal';
 import { ChannelMembersModal } from '@/features/channels/components/channel-members-modal';
+import { ChannelSettingsModal } from '@/features/channels/components/channel-settings-modal';
 import { Button } from '@flowchat/ui';
 import { useUiStore } from '@/stores/ui-store';
 
@@ -70,6 +72,7 @@ function WorkspaceLayout(): React.JSX.Element {
 
   usePresence(workspaceId);
   useHeartbeat();
+  useWorkspaceSocket(workspaceId);
 
   return (
     <div className="flex h-screen bg-white">
@@ -93,6 +96,7 @@ function WorkspaceLayout(): React.JSX.Element {
       <AddChannelMembersModal />
       <WorkspaceMembersModal />
       <ChannelMembersModal />
+      <ChannelSettingsModal />
     </div>
   );
 }

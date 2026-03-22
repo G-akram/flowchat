@@ -12,6 +12,7 @@ type ModalType =
   | 'addChannelMembers'
   | 'workspaceMembers'
   | 'channelMembers'
+  | 'channelSettings'
   | null;
 
 interface ModalData {

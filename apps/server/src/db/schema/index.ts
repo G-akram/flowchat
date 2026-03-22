@@ -8,6 +8,7 @@ import { channelMembers } from './channel-members';
 import { messageAttachments } from './message-attachments';
 import { reactions } from './reactions';
 import { refreshTokens } from './refresh-tokens';
+import { notifications } from './notifications';
 
 // ─── Table exports ────────────────────────────────────────────────────────────
 
@@ -20,6 +21,7 @@ export { channelMembers } from './channel-members';
 export { messageAttachments } from './message-attachments';
 export { reactions } from './reactions';
 export { refreshTokens } from './refresh-tokens';
+export { notifications, notificationTypeEnum } from './notifications';
 
 // ─── Type exports ─────────────────────────────────────────────────────────────
 
@@ -32,6 +34,7 @@ export type { DbChannelMember, NewDbChannelMember } from './channel-members';
 export type { DbMessageAttachment, NewDbMessageAttachment } from './message-attachments';
 export type { DbReaction, NewDbReaction } from './reactions';
 export type { DbRefreshToken, NewDbRefreshToken } from './refresh-tokens';
+export type { DbNotification, NewDbNotification } from './notifications';
 
 // ─── Relations ────────────────────────────────────────────────────────────────
 
@@ -92,4 +95,9 @@ export const reactionsRelations = relations(reactions, ({ one }) => ({
 
 export const refreshTokensRelations = relations(refreshTokens, ({ one }) => ({
   user: one(users, { fields: [refreshTokens.userId], references: [users.id] }),
+}));
+
+export const notificationsRelations = relations(notifications, ({ one }) => ({
+  user: one(users, { fields: [notifications.userId], references: [users.id] }),
+  workspace: one(workspaces, { fields: [notifications.workspaceId], references: [workspaces.id] }),
 }));

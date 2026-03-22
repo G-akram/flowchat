@@ -1,3 +1,35 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+[data-sonner-toast] {
+  --normal-bg: #fff;
+  --normal-border: theme(colors.gray.200);
+  animation: toast-slide-in 0.35s cubic-bezier(0.21, 1.02, 0.73, 1);
+}
+
+[data-sonner-toast][data-removed='true'] {
+  animation: toast-slide-out 0.2s ease-in forwards;
+}
+
+@keyframes toast-slide-in {
+  0% {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes toast-slide-out {
+  0% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}

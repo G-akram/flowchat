@@ -22,6 +22,13 @@
       "when": 1774174984151,
       "tag": "0002_hesitant_princess_powerful",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1774194399243,
+      "tag": "0003_unique_forgotten_one",
+      "breakpoints": true
     }
   ]
 }

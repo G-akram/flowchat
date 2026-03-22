@@ -1,4 +1,4 @@
-import { eq, and } from 'drizzle-orm';
+import { eq, and, ne, asc, sql } from 'drizzle-orm';
 import { db } from '../../lib/db';
 import { channels, type DbChannel } from '../../db/schema/channels';
 import { channelMembers, type DbChannelMember } from '../../db/schema/channel-members';
@@ -135,6 +135,50 @@ export interface ChannelMemberProfile {
   username: string;
   avatarUrl: string | null;
   role: string;
+}
+
+export async function findNextChannelOwner(
+  channelId: string,
+  workspaceId: string,
+  excludeUserId: string
+): Promise<{ userId: string } | undefined> {
+  const result = await db
+    .select({
+      userId: channelMembers.userId,
+      role: workspaceMembers.role,
+      joinedAt: channelMembers.joinedAt,
+    })
+    .from(channelMembers)
+    .innerJoin(
+      workspaceMembers,
+      and(
+        eq(workspaceMembers.userId, channelMembers.userId),
+        eq(workspaceMembers.workspaceId, workspaceId)
+      )
+    )
+    .where(
+      and(
+        eq(channelMembers.channelId, channelId),
+        ne(channelMembers.userId, excludeUserId)
+      )
+    )
+    .orderBy(
+      sql`CASE ${workspaceMembers.role} WHEN 'owner' THEN 0 WHEN 'admin' THEN 1 ELSE 2 END`,
+      asc(channelMembers.joinedAt)
+    )
+    .limit(1);
+
+  return result[0] ? { userId: result[0].userId } : undefined;
+}
+
+export async function updateChannelCreator(
+  channelId: string,
+  newCreatorId: string
+): Promise<void> {
+  await db
+    .update(channels)
+    .set({ createdById: newCreatorId })
+    .where(eq(channels.id, channelId));
 }
 
 export async function findChannelMemberProfiles(
