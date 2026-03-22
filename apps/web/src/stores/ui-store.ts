@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-type ModalType = 'createChannel' | 'createWorkspace' | 'inviteMembers' | 'editProfile' | null;
+type ModalType = 'createChannel' | 'createWorkspace' | 'inviteMembers' | 'editProfile' | 'newDm' | null;
 
 interface UiState {
   isSidebarOpen: boolean;

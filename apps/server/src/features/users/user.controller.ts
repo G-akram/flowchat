@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from 'express';
 import type { UserParams, UpdateProfileInput, WorkspacePresenceParams } from './user.schemas';
-import { getProfile, updateProfile, getWorkspacePresence } from './user.service';
+import { getProfile, updateProfile, getWorkspacePresence, listWorkspaceMembers } from './user.service';
 import { AppError } from '../../lib/errors';
 
 export async function getMeHandler(
@@ -58,6 +58,26 @@ export async function getUserHandler(
     const profile = await getProfile(req.params.userId);
 
     res.status(200).json({ data: { user: profile } });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function listWorkspaceMembersHandler(
+  req: Request<WorkspacePresenceParams>,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const user = req.user;
+
+    if (!user) {
+      throw new AppError('UNAUTHORIZED', 'Not authenticated', 401);
+    }
+
+    const members = await listWorkspaceMembers(req.params.workspaceId, user.id);
+
+    res.status(200).json({ data: { members } });
   } catch (err) {
     next(err);
   }

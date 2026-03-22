@@ -12,6 +12,7 @@ interface MessageItemProps {
   onRetry: ((tempId: string, content: string) => void) | undefined;
   onRemoveFailed: ((tempId: string) => void) | undefined;
   onToggleReaction: (messageId: string, emoji: string, hasReacted: boolean) => void;
+  onUserClick?: ((userId: string) => void) | undefined;
 }
 
 function formatTime(dateString: string): string {
@@ -25,6 +26,7 @@ export function MessageItem({
   onRetry,
   onRemoveFailed,
   onToggleReaction,
+  onUserClick,
 }: MessageItemProps): React.JSX.Element {
   const isFailed = isOptimisticMessage(message) && message.status === 'failed';
   const isSending = isOptimisticMessage(message) && message.status === 'sending';
@@ -110,7 +112,12 @@ export function MessageItem({
       {addButton}
       {picker}
 
-      <div className="relative shrink-0 pt-0.5">
+      <button
+        type="button"
+        className="relative shrink-0 pt-0.5 cursor-pointer"
+        onClick={() => onUserClick?.(message.user.id)}
+        title={`Message ${message.user.displayName}`}
+      >
         <Avatar
           src={message.user.avatarUrl}
           alt={message.user.displayName}
@@ -119,7 +126,7 @@ export function MessageItem({
         <span className="absolute -bottom-0.5 -right-0.5">
           <PresenceDot userId={message.user.id} size="sm" />
         </span>
-      </div>
+      </button>
 
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline gap-2">

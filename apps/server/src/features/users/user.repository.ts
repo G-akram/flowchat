@@ -39,6 +39,30 @@ export async function findWorkspaceMemberUserIds(workspaceId: string): Promise<s
   return result.map((r) => r.userId);
 }
 
+export interface WorkspaceMemberProfile {
+  id: string;
+  displayName: string;
+  username: string;
+  avatarUrl: string | null;
+}
+
+export async function findWorkspaceMemberProfiles(
+  workspaceId: string
+): Promise<WorkspaceMemberProfile[]> {
+  const result = await db
+    .select({
+      id: users.id,
+      displayName: users.displayName,
+      username: users.username,
+      avatarUrl: users.avatarUrl,
+    })
+    .from(workspaceMembers)
+    .innerJoin(users, eq(workspaceMembers.userId, users.id))
+    .where(eq(workspaceMembers.workspaceId, workspaceId));
+
+  return result;
+}
+
 export async function findWorkspaceMember(
   workspaceId: string,
   userId: string

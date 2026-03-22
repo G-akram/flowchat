@@ -16,6 +16,7 @@ interface ChannelResponse {
   name: string;
   description: string | null;
   isPrivate: boolean;
+  isDirectMessage: boolean;
   createdById: string;
   createdAt: string;
 }
@@ -27,6 +28,7 @@ function mapChannel(ch: DbChannel): ChannelResponse {
     name: ch.name,
     description: ch.description,
     isPrivate: ch.isPrivate,
+    isDirectMessage: ch.isDirectMessage,
     createdById: ch.createdById,
     createdAt: ch.createdAt.toISOString(),
   };
@@ -69,8 +71,8 @@ export async function listByWorkspace(
 ): Promise<ChannelResponse[]> {
   await ensureWorkspaceMember(workspaceId, userId);
 
-  const channels = await findChannelsByUserInWorkspace(workspaceId, userId);
-  return channels.map(mapChannel);
+  const allChannels = await findChannelsByUserInWorkspace(workspaceId, userId);
+  return allChannels.filter((ch) => !ch.isDirectMessage).map(mapChannel);
 }
 
 export async function join(

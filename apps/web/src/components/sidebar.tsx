@@ -4,6 +4,7 @@ import { useAuthStore } from '@/stores/auth-store';
 import { useLogout } from '@/features/auth/api/use-logout';
 import { useWorkspaces } from '@/features/workspaces/api/use-workspaces';
 import { useChannels } from '@/features/channels/api/use-channels';
+import { useDirectMessages } from '@/features/dm/api/use-direct-messages';
 import { Button } from '@flowchat/ui';
 import { PresenceDot } from '@/components/presence-dot';
 import { useUiStore } from '@/stores/ui-store';
@@ -37,6 +38,7 @@ export function Sidebar(): React.JSX.Element {
   const openModal = useUiStore((s) => s.openModal);
   const { workspaces, isLoading: isLoadingWorkspaces } = useWorkspaces();
   const { channels, isLoading: isLoadingChannels } = useChannels(workspaceId);
+  const { dms, isLoading: isLoadingDms } = useDirectMessages(workspaceId);
 
   const activeWorkspace = workspaces?.find((w) => w.id === workspaceId);
 
@@ -73,6 +75,46 @@ export function Sidebar(): React.JSX.Element {
                 >
                   <span className="mr-1 text-gray-400">#</span>
                   {channel.name}
+                </Link>
+              );
+            })}
+          </nav>
+        )}
+
+        <div className="mt-4 flex items-center justify-between">
+          <p className="text-xs font-medium uppercase tracking-wider text-gray-400">
+            Direct Messages
+          </p>
+          <button
+            type="button"
+            className="flex h-5 w-5 items-center justify-center rounded text-gray-400 hover:bg-gray-200 hover:text-gray-600"
+            title="New direct message"
+            onClick={() => openModal('newDm')}
+          >
+            <span className="text-sm leading-none">+</span>
+          </button>
+        </div>
+
+        {isLoadingDms ? (
+          <ChannelListSkeleton />
+        ) : !dms || dms.length === 0 ? (
+          <p className="mt-2 text-xs text-gray-400">No conversations yet</p>
+        ) : (
+          <nav className="mt-2 space-y-0.5">
+            {dms.map((dm) => {
+              const isActive = dm.id === channelId;
+              return (
+                <Link
+                  key={dm.id}
+                  to={`/app/${workspaceId}/${dm.id}`}
+                  className={`flex items-center gap-2 rounded px-2 py-1.5 text-sm ${
+                    isActive
+                      ? 'bg-gray-200 font-medium text-gray-900'
+                      : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                  }`}
+                >
+                  <PresenceDot userId={dm.otherUser.id} size="sm" />
+                  <span className="truncate">{dm.otherUser.displayName}</span>
                 </Link>
               );
             })}

@@ -12,6 +12,7 @@ import {
   getWorkspaceHandler,
   inviteMemberHandler,
 } from './workspace.controller';
+import { listWorkspaceMembersHandler } from '../users/user.controller';
 
 const router: ExpressRouter = Router();
 
@@ -23,6 +24,11 @@ router.get(
   '/:workspaceId',
   validate({ params: workspaceParamsSchema }),
   getWorkspaceHandler
+);
+router.get(
+  '/:workspaceId/members',
+  validate({ params: workspaceParamsSchema }),
+  listWorkspaceMembersHandler
 );
 router.post(
   '/:workspaceId/members',

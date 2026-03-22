@@ -6,6 +6,7 @@ export const channelSchema = z.object({
   name: z.string().min(1).max(80),
   topic: z.string().max(250).nullable(),
   isPrivate: z.boolean(),
+  isDirectMessage: z.boolean(),
   createdAt: z.string().datetime(),
 });
 

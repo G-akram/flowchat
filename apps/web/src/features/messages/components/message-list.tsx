@@ -10,6 +10,7 @@ interface MessageListProps {
   onRetry: (tempId: string, content: string) => void;
   onRemoveFailed: (tempId: string) => void;
   onToggleReaction: (messageId: string, emoji: string, hasReacted: boolean) => void;
+  onUserClick?: ((userId: string) => void) | undefined;
 }
 
 const SCROLL_THRESHOLD = 150;
@@ -31,6 +32,7 @@ export function MessageList({
   onRetry,
   onRemoveFailed,
   onToggleReaction,
+  onUserClick,
 }: MessageListProps): React.JSX.Element {
   const {
     data,
@@ -162,6 +164,7 @@ export function MessageList({
                 onRetry={onRetry}
                 onRemoveFailed={onRemoveFailed}
                 onToggleReaction={onToggleReaction}
+                onUserClick={onUserClick}
               />
             );
           })}

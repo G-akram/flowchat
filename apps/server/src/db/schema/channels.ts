@@ -12,6 +12,7 @@ export const channels = pgTable(
     name: varchar('name', { length: 80 }).notNull(),
     description: text('description'),
     isPrivate: boolean('is_private').notNull().default(false),
+    isDirectMessage: boolean('is_direct_message').notNull().default(false),
     createdById: uuid('created_by_id')
       .notNull()
       .references(() => users.id, { onDelete: 'restrict' }),

@@ -6,6 +6,8 @@ import {
   updateUser,
   findWorkspaceMemberUserIds,
   findWorkspaceMember,
+  findWorkspaceMemberProfiles,
+  type WorkspaceMemberProfile,
 } from './user.repository';
 
 interface UserProfile {
@@ -63,6 +65,19 @@ export async function updateProfile(
   }
 
   return toProfile(updated);
+}
+
+export async function listWorkspaceMembers(
+  workspaceId: string,
+  requestingUserId: string
+): Promise<WorkspaceMemberProfile[]> {
+  const member = await findWorkspaceMember(workspaceId, requestingUserId);
+
+  if (!member) {
+    throw new AppError('NOT_A_MEMBER', 'You are not a member of this workspace', 403);
+  }
+
+  return findWorkspaceMemberProfiles(workspaceId);
 }
 
 export async function getWorkspacePresence(

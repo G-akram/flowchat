@@ -1,6 +1,9 @@
 import React, { useCallback } from 'react';
 import { useQueryClient, type InfiniteData } from '@tanstack/react-query';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useChannelSocket } from '@/hooks/use-channel-socket';
+import { useAuthStore } from '@/stores/auth-store';
+import { useOpenDm } from '@/features/dm/api/use-open-dm';
 import { MessageList } from './message-list';
 import { MessageInput } from './message-input';
 import { TypingIndicator } from './typing-indicator';
@@ -16,18 +19,23 @@ interface MessagesPage {
 
 interface ChannelViewProps {
   channelId: string;
-  channelName?: string;
+  channelName?: string | undefined;
+  isDm?: boolean | undefined;
 }
 
 function generateTempId(): string {
   return `temp-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
-export function ChannelView({ channelId, channelName }: ChannelViewProps): React.JSX.Element {
+export function ChannelView({ channelId, channelName, isDm = false }: ChannelViewProps): React.JSX.Element {
   const { typingUsers, newMessageFlag, clearNewMessageFlag } = useChannelSocket(channelId);
   const { mutate: sendMessage } = useSendMessage();
   const { mutate: toggleReaction } = useToggleReaction();
   const queryClient = useQueryClient();
+  const { workspaceId } = useParams<{ workspaceId: string }>();
+  const navigate = useNavigate();
+  const currentUser = useAuthStore((s) => s.user);
+  const { mutateAsync: openDm } = useOpenDm();
 
   const handleRetry = useCallback(
     (failedTempId: string, content: string): void => {
@@ -75,11 +83,25 @@ export function ChannelView({ channelId, channelName }: ChannelViewProps): React
     [channelId, toggleReaction]
   );
 
+  const handleUserClick = useCallback(
+    async (userId: string): Promise<void> => {
+      if (!workspaceId || !currentUser || userId === currentUser.id) return;
+
+      try {
+        const dm = await openDm({ workspaceId, userId });
+        navigate(`/app/${workspaceId}/${dm.id}`);
+      } catch {
+        // silently ignore — user will see no navigation
+      }
+    },
+    [workspaceId, currentUser, openDm, navigate]
+  );
+
   return (
     <div className="flex h-full flex-col">
       <div className="flex h-12 shrink-0 items-center border-b border-gray-200 px-4">
         <h2 className="text-sm font-semibold text-gray-900">
-          # {channelName ?? 'channel'}
+          {isDm ? '' : '# '}{channelName ?? (isDm ? 'Direct Message' : 'channel')}
         </h2>
       </div>
 
@@ -90,6 +112,7 @@ export function ChannelView({ channelId, channelName }: ChannelViewProps): React
         onRetry={handleRetry}
         onRemoveFailed={handleRemoveFailed}
         onToggleReaction={handleToggleReaction}
+        onUserClick={handleUserClick}
       />
 
       <TypingIndicator typingUsers={typingUsers} />

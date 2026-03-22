@@ -7,9 +7,17 @@ import { Sidebar } from '@/components/sidebar';
 import { usePresence } from '@/hooks/use-presence';
 import { useHeartbeat } from '@/hooks/use-heartbeat';
 import { ProfileModal } from '@/features/users/components/profile-modal';
+import { useChannels } from '@/features/channels/api/use-channels';
+import { useDirectMessages } from '@/features/dm/api/use-direct-messages';
+import { NewDmModal } from '@/features/dm/components/new-dm-modal';
 
 function ChannelPage(): React.JSX.Element {
-  const { channelId } = useParams<{ channelId: string }>();
+  const { workspaceId, channelId } = useParams<{
+    workspaceId: string;
+    channelId: string;
+  }>();
+  const { channels } = useChannels(workspaceId);
+  const { dms } = useDirectMessages(workspaceId);
 
   if (!channelId) {
     return (
@@ -19,7 +27,14 @@ function ChannelPage(): React.JSX.Element {
     );
   }
 
-  return <ChannelView channelId={channelId} />;
+  const channel = channels?.find((c) => c.id === channelId);
+  const dm = dms?.find((d) => d.id === channelId);
+  const isDm = Boolean(dm);
+  const displayName = dm
+    ? dm.otherUser.displayName
+    : channel?.name ?? undefined;
+
+  return <ChannelView channelId={channelId} channelName={displayName} isDm={isDm} />;
 }
 
 function WelcomePage(): React.JSX.Element {
@@ -57,6 +72,7 @@ function WorkspaceLayout(): React.JSX.Element {
       </main>
 
       <ProfileModal />
+      <NewDmModal />
     </div>
   );
 }

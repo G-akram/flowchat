@@ -1,0 +1,1 @@
+ALTER TABLE "channels" ADD COLUMN "is_direct_message" boolean DEFAULT false NOT NULL;
