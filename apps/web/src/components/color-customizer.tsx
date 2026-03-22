@@ -28,7 +28,9 @@ function hslToHex(hsl: HslValues): string {
   const f = (n: number): string => {
     const k = (n + hsl.h / 30) % 12;
     const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
-    return Math.round(255 * color).toString(16).padStart(2, '0');
+    return Math.round(255 * color)
+      .toString(16)
+      .padStart(2, '0');
   };
   return `#${f(0)}${f(8)}${f(4)}`;
 }
@@ -54,12 +56,31 @@ function getCurrentVariables(): Record<string, string> {
   const style = getComputedStyle(document.documentElement);
   const vars: Record<string, string> = {};
   const names = [
-    'background', 'foreground', 'card', 'card-foreground', 'popover', 'popover-foreground',
-    'primary', 'primary-foreground', 'secondary', 'secondary-foreground',
-    'muted', 'muted-foreground', 'accent', 'accent-foreground',
-    'destructive', 'destructive-foreground', 'border', 'input', 'ring',
-    'sidebar', 'sidebar-foreground', 'sidebar-border', 'sidebar-accent',
-    'sidebar-accent-foreground', 'sidebar-muted-foreground',
+    'background',
+    'foreground',
+    'card',
+    'card-foreground',
+    'popover',
+    'popover-foreground',
+    'primary',
+    'primary-foreground',
+    'secondary',
+    'secondary-foreground',
+    'muted',
+    'muted-foreground',
+    'accent',
+    'accent-foreground',
+    'destructive',
+    'destructive-foreground',
+    'border',
+    'input',
+    'ring',
+    'sidebar',
+    'sidebar-foreground',
+    'sidebar-border',
+    'sidebar-accent',
+    'sidebar-accent-foreground',
+    'sidebar-muted-foreground',
   ];
   for (const name of names) {
     vars[name] = style.getPropertyValue(`--${name}`).trim();
@@ -100,7 +121,9 @@ function ColorSection({
     <div>
       <div className="mb-2 flex items-center justify-between">
         <span className="text-xs font-semibold text-popover-foreground">{label}</span>
-        <span className="font-mono text-[11px] tracking-wide text-muted-foreground">{hex.toUpperCase()}</span>
+        <span className="font-mono text-[11px] tracking-wide text-muted-foreground">
+          {hex.toUpperCase()}
+        </span>
       </div>
 
       <input
@@ -127,8 +150,18 @@ function ColorSection({
         />
         <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-150 group-hover:opacity-100">
           <div className="flex items-center gap-1.5 rounded-md bg-black/30 px-2.5 py-1 backdrop-blur-sm">
-            <svg className="h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15.042 21.672L13.684 16.6m0 0l-2.51 2.225.569-9.47 5.227 7.917-3.286-.672zM12 2.25V4.5m5.834.166l-1.591 1.591M20.25 10.5H18M7.757 14.743l-1.59 1.59M6 10.5H3.75m4.007-4.243l-1.59-1.59" />
+            <svg
+              className="h-3.5 w-3.5 text-white"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M15.042 21.672L13.684 16.6m0 0l-2.51 2.225.569-9.47 5.227 7.917-3.286-.672zM12 2.25V4.5m5.834.166l-1.591 1.591M20.25 10.5H18M7.757 14.743l-1.59 1.59M6 10.5H3.75m4.007-4.243l-1.59-1.59"
+              />
             </svg>
             <span className="text-[11px] font-medium text-white">Pick color</span>
           </div>
@@ -138,7 +171,9 @@ function ColorSection({
       <div className="grid grid-cols-3 gap-1.5">
         {channels.map(({ lbl, val, max, key }) => (
           <label key={lbl} className="flex flex-col gap-0.5">
-            <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{lbl}</span>
+            <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+              {lbl}
+            </span>
             <input
               type="number"
               min={0}
@@ -163,14 +198,29 @@ export function ColorCustomizer(): React.JSX.Element | null {
   const [copied, setCopied] = useState(false);
   const { resolvedTheme } = useTheme();
 
-  const [position, setPosition] = useState({ x: 264, y: 12 });
-  const dragRef = useRef<{ startX: number; startY: number; originX: number; originY: number; didDrag: boolean } | null>(null);
+  const [position, setPosition] = useState({ x: 224, y: 30 });
+  const dragRef = useRef<{
+    startX: number;
+    startY: number;
+    originX: number;
+    originY: number;
+    didDrag: boolean;
+  } | null>(null);
   const DRAG_THRESHOLD = 4;
 
-  const handlePointerDown = useCallback((e: React.PointerEvent): void => {
-    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-    dragRef.current = { startX: e.clientX, startY: e.clientY, originX: position.x, originY: position.y, didDrag: false };
-  }, [position]);
+  const handlePointerDown = useCallback(
+    (e: React.PointerEvent): void => {
+      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+      dragRef.current = {
+        startX: e.clientX,
+        startY: e.clientY,
+        originX: position.x,
+        originY: position.y,
+        didDrag: false,
+      };
+    },
+    [position]
+  );
 
   const handlePointerMove = useCallback((e: React.PointerEvent): void => {
     if (!dragRef.current) return;
@@ -191,14 +241,18 @@ export function ColorCustomizer(): React.JSX.Element | null {
 
   const defaults = DEFAULTS[resolvedTheme];
 
-  const currentPrimaryRaw = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim();
-  const currentBgRaw = getComputedStyle(document.documentElement).getPropertyValue('--background').trim();
+  const currentPrimaryRaw = getComputedStyle(document.documentElement)
+    .getPropertyValue('--primary')
+    .trim();
+  const currentBgRaw = getComputedStyle(document.documentElement)
+    .getPropertyValue('--background')
+    .trim();
 
   const [primary, setPrimary] = useState<HslValues>(
-    currentPrimaryRaw ? parseHsl(currentPrimaryRaw) : defaults.primary,
+    currentPrimaryRaw ? parseHsl(currentPrimaryRaw) : defaults.primary
   );
   const [background, setBackground] = useState<HslValues>(
-    currentBgRaw ? parseHsl(currentBgRaw) : defaults.background,
+    currentBgRaw ? parseHsl(currentBgRaw) : defaults.background
   );
 
   const applyPrimary = useCallback((next: HslValues): void => {
@@ -240,8 +294,18 @@ export function ColorCustomizer(): React.JSX.Element | null {
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
       >
-        <svg className="pointer-events-none h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+        <svg
+          className="pointer-events-none h-4 w-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"
+          />
         </svg>
       </div>
     );
@@ -272,7 +336,13 @@ export function ColorCustomizer(): React.JSX.Element | null {
           onPointerDown={(e) => e.stopPropagation()}
           className="flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground"
         >
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg
+            className="h-4 w-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
