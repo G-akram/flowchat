@@ -9,8 +9,16 @@ export const messageParamsSchema = z.object({
   messageId: z.string().uuid('Invalid message ID'),
 });
 
+const attachmentInputSchema = z.object({
+  key: z.string().min(1),
+  fileName: z.string().min(1).max(255),
+  mimeType: z.string().min(1),
+  fileSize: z.number().int().positive(),
+});
+
 export const createMessageSchema = z.object({
   content: z.string().min(1, 'Message content is required').max(4000, 'Message too long'),
+  attachments: z.array(attachmentInputSchema).max(10).optional(),
 });
 
 export const updateMessageSchema = z.object({

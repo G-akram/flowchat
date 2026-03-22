@@ -13,11 +13,26 @@ import {
   getReactionsForMessage,
   getReactionsForMessages,
 } from '../reactions/reaction.repository';
+import {
+  createAttachments,
+  findAttachmentsByMessageId,
+  findAttachmentsByMessageIds,
+} from '../uploads/upload.repository';
+import { supabase } from '../../lib/supabase';
+import { env } from '../../lib/env';
 
 interface ReactionResponse {
   emoji: string;
   count: number;
   hasReacted: boolean;
+}
+
+interface AttachmentResponse {
+  id: string;
+  url: string;
+  fileName: string;
+  fileSize: number;
+  mimeType: string;
 }
 
 interface MessageResponse {
@@ -32,11 +47,13 @@ interface MessageResponse {
     avatarUrl: string | null;
   };
   reactions: ReactionResponse[];
+  attachments: AttachmentResponse[];
 }
 
 function mapMessage(
   msg: MessageWithUser,
-  reactions: ReactionResponse[] = []
+  reactions: ReactionResponse[] = [],
+  attachments: AttachmentResponse[] = []
 ): MessageResponse {
   return {
     id: msg.id,
@@ -46,6 +63,7 @@ function mapMessage(
     createdAt: msg.createdAt.toISOString(),
     user: msg.user,
     reactions,
+    attachments,
   };
 }
 
@@ -70,7 +88,34 @@ export async function create(
     content: input.content,
   });
 
-  return mapMessage(message, []);
+  let attachmentResponses: AttachmentResponse[] = [];
+
+  if (input.attachments && input.attachments.length > 0) {
+    const records = input.attachments.map((attachment) => {
+      const { data: publicData } = supabase.storage
+        .from(env.SUPABASE_BUCKET_NAME)
+        .getPublicUrl(attachment.key);
+
+      return {
+        messageId: message.id,
+        url: publicData.publicUrl,
+        fileName: attachment.fileName,
+        fileSize: attachment.fileSize,
+        mimeType: attachment.mimeType,
+      };
+    });
+
+    const dbAttachments = await createAttachments(records);
+    attachmentResponses = dbAttachments.map((a) => ({
+      id: a.id,
+      url: a.url,
+      fileName: a.fileName,
+      fileSize: a.fileSize,
+      mimeType: a.mimeType,
+    }));
+  }
+
+  return mapMessage(message, [], attachmentResponses);
 }
 
 export async function list(
@@ -88,6 +133,7 @@ export async function list(
 
   const messageIds = trimmed.map((m) => m.id);
   const reactionsMap = await getReactionsForMessages(messageIds);
+  const attachmentsMap = await findAttachmentsByMessageIds(messageIds);
 
   const messages = trimmed.map((msg) => {
     const aggregates = reactionsMap.get(msg.id) ?? [];
@@ -96,7 +142,14 @@ export async function list(
       count: agg.count,
       hasReacted: agg.userIds.includes(userId),
     }));
-    return mapMessage(msg, reactionResponses);
+    const msgAttachments = (attachmentsMap.get(msg.id) ?? []).map((a) => ({
+      id: a.id,
+      url: a.url,
+      fileName: a.fileName,
+      fileSize: a.fileSize,
+      mimeType: a.mimeType,
+    }));
+    return mapMessage(msg, reactionResponses, msgAttachments);
   });
 
   const nextCursor = hasMore ? messages[messages.length - 1]!.id : null;
@@ -135,7 +188,16 @@ export async function update(
     hasReacted: agg.userIds.includes(userId),
   }));
 
-  return mapMessage(updated, reactionResponses);
+  const dbAttachments = await findAttachmentsByMessageId(messageId);
+  const attachmentResponses = dbAttachments.map((a) => ({
+    id: a.id,
+    url: a.url,
+    fileName: a.fileName,
+    fileSize: a.fileSize,
+    mimeType: a.mimeType,
+  }));
+
+  return mapMessage(updated, reactionResponses, attachmentResponses);
 }
 
 export async function remove(

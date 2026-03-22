@@ -8,6 +8,12 @@ interface SendMessageVariables {
   channelId: string;
   content: string;
   tempId: string;
+  attachmentKeys?: Array<{
+    key: string;
+    fileName: string;
+    mimeType: string;
+    fileSize: number;
+  }>;
 }
 
 interface MessagesPage {
@@ -20,15 +26,19 @@ export function useSendMessage() {
   const user = useAuthStore((s) => s.user);
 
   return useMutation<MessageWithUser, Error, SendMessageVariables>({
-    mutationFn: async ({ channelId, content }): Promise<MessageWithUser> => {
+    mutationFn: async ({ channelId, content, attachmentKeys }): Promise<MessageWithUser> => {
+      const body: Record<string, unknown> = { content };
+      if (attachmentKeys && attachmentKeys.length > 0) {
+        body['attachments'] = attachmentKeys;
+      }
       const response = await apiClient.post<{ data: { message: MessageWithUser } }>(
         `/channels/${channelId}/messages`,
-        { content }
+        body
       );
       return response.data.data.message;
     },
 
-    onMutate: async ({ channelId, content, tempId }) => {
+    onMutate: async ({ channelId, content, tempId, attachmentKeys }) => {
       const key = messagesQueryKey(channelId);
       await queryClient.cancelQueries({ queryKey: key });
 
@@ -44,6 +54,13 @@ export function useSendMessage() {
           createdAt: new Date().toISOString(),
           status: 'sending',
           reactions: [],
+          attachments: (attachmentKeys ?? []).map((a, idx) => ({
+            id: `temp-att-${idx}`,
+            url: '',
+            fileName: a.fileName,
+            fileSize: a.fileSize,
+            mimeType: a.mimeType,
+          })),
           user: {
             id: user.id,
             displayName: user.displayName,

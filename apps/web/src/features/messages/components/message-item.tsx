@@ -5,6 +5,7 @@ import type { DisplayMessage } from '../types';
 import { isOptimisticMessage } from '../types';
 import { ReactionBar } from './reaction-bar';
 import { EmojiPicker } from './emoji-picker';
+import { MessageAttachments } from '@/features/uploads/components/message-attachments';
 
 interface MessageItemProps {
   message: DisplayMessage;
@@ -94,6 +95,9 @@ export function MessageItem({
           >
             {message.content}
           </p>
+          {message.attachments && message.attachments.length > 0 && (
+            <MessageAttachments attachments={message.attachments} />
+          )}
           {isFailed && (
             <FailedActions
               tempId={(message as { tempId: string }).tempId}
@@ -152,6 +156,10 @@ export function MessageItem({
         >
           {message.content}
         </p>
+
+        {message.attachments && message.attachments.length > 0 && (
+          <MessageAttachments attachments={message.attachments} />
+        )}
 
         {isFailed && (
           <FailedActions

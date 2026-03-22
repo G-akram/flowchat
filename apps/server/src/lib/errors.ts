@@ -15,7 +15,10 @@ export type ErrorCode =
   | 'MESSAGE_NOT_FOUND'
   | 'NOT_A_MEMBER'
   | 'ALREADY_A_MEMBER'
-  | 'RATE_LIMITED';
+  | 'RATE_LIMITED'
+  | 'FILE_TOO_LARGE'
+  | 'INVALID_FILE_TYPE'
+  | 'UPLOAD_FAILED';
 
 export class AppError extends Error {
   public readonly code: ErrorCode;

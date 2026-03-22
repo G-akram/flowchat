@@ -10,6 +10,14 @@ export interface ReactionData {
   hasReacted: boolean;
 }
 
+export interface AttachmentData {
+  id: string;
+  url: string;
+  fileName: string;
+  fileSize: number;
+  mimeType: string;
+}
+
 export interface MessageWithUser {
   id: string;
   channelId: string;
@@ -18,6 +26,7 @@ export interface MessageWithUser {
   createdAt: string;
   user: MessageUser;
   reactions: ReactionData[];
+  attachments: AttachmentData[];
 }
 
 export interface OptimisticMessage extends MessageWithUser {

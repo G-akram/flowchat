@@ -14,6 +14,7 @@ import { reactionRouter } from './features/reactions/reaction.routes';
 import { userRouter, presenceRouter } from './features/users/user.routes';
 import { dmRouter } from './features/dm/dm.routes';
 import { searchRouter } from './features/search/search.routes';
+import { uploadRouter } from './features/uploads/upload.routes';
 
 export const app: Express = express();
 
@@ -48,5 +49,6 @@ app.use('/api/users', userRouter);
 app.use('/api/workspaces/:workspaceId/dms', dmRouter);
 app.use('/api/workspaces/:workspaceId/presence', presenceRouter);
 app.use('/api/workspaces/:workspaceId/search', searchRouter);
+app.use('/api/uploads', uploadRouter);
 
 app.use(errorHandler);
