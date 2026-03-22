@@ -26,6 +26,7 @@ export function useAddChannelMember(options?: UseAddChannelMemberOptions): Retur
     mutationFn: addChannelMember,
     onSuccess: (_data, variables) => {
       void queryClient.invalidateQueries({ queryKey: ['channels', variables.workspaceId] });
+      void queryClient.invalidateQueries({ queryKey: ['channel-members', variables.workspaceId, variables.channelId] });
       options?.onSuccess?.();
     },
   });

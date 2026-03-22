@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useParams } from 'react-router-dom';
-import { Button, Input } from '@flowchat/ui';
+import { Button, Input, Modal } from '@flowchat/ui';
 import { useUiStore } from '@/stores/ui-store';
 import { useUpdateChannel } from '../api/use-update-channel';
 
@@ -53,10 +53,6 @@ export function EditChannelModal(): React.JSX.Element | null {
     }
   }, [activeModal, modalData, reset]);
 
-  if (activeModal !== 'editChannel' || !modalData?.channelId) {
-    return null;
-  }
-
   function onSubmit(values: EditChannelFormValues): void {
     if (!workspaceId || !modalData?.channelId) return;
 
@@ -84,8 +80,8 @@ export function EditChannelModal(): React.JSX.Element | null {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
+    <Modal open={activeModal === 'editChannel' && Boolean(modalData?.channelId)} onClose={handleClose}>
+      <div className="p-6">
         <h2 className="text-lg font-semibold text-gray-900">Edit channel</h2>
 
         <form onSubmit={handleSubmit(onSubmit)} className="mt-4 space-y-4">
@@ -127,6 +123,6 @@ export function EditChannelModal(): React.JSX.Element | null {
           </div>
         </form>
       </div>
-    </div>
+    </Modal>
   );
 }

@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useNavigate } from 'react-router-dom';
-import { Button, Input } from '@flowchat/ui';
+import { Button, Input, Modal } from '@flowchat/ui';
 import { useUiStore } from '@/stores/ui-store';
 import { useCreateWorkspace } from '../api/use-create-workspace';
 
@@ -39,10 +39,6 @@ export function CreateWorkspaceModal(): React.JSX.Element | null {
     defaultValues: { name: '' },
   });
 
-  if (activeModal !== 'createWorkspace') {
-    return null;
-  }
-
   function onSubmit(values: CreateWorkspaceFormValues): void {
     mutate(values, {
       onError: (err) => {
@@ -60,8 +56,8 @@ export function CreateWorkspaceModal(): React.JSX.Element | null {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
+    <Modal open={activeModal === 'createWorkspace'} onClose={handleClose}>
+      <div className="p-6">
         <h2 className="text-lg font-semibold text-gray-900">Create a workspace</h2>
         <p className="mt-1 text-sm text-gray-500">
           Workspaces are shared spaces for your team to communicate.
@@ -93,6 +89,6 @@ export function CreateWorkspaceModal(): React.JSX.Element | null {
           </div>
         </form>
       </div>
-    </div>
+    </Modal>
   );
 }

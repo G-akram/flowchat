@@ -8,6 +8,7 @@ export interface ChannelMember {
   displayName: string;
   username: string;
   avatarUrl: string | null;
+  role: string;
 }
 
 interface ChannelMembersResponse {

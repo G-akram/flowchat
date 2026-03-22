@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Button, Input } from '@flowchat/ui';
+import { Button, Input, Modal } from '@flowchat/ui';
 import { useUiStore } from '@/stores/ui-store';
 import { useCreateChannel } from '../api/use-create-channel';
 
@@ -45,10 +45,6 @@ export function CreateChannelModal(): React.JSX.Element | null {
     defaultValues: { name: '', description: '', isPrivate: false },
   });
 
-  if (activeModal !== 'createChannel') {
-    return null;
-  }
-
   function onSubmit(values: CreateChannelFormValues): void {
     if (!workspaceId) return;
 
@@ -71,8 +67,8 @@ export function CreateChannelModal(): React.JSX.Element | null {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
+    <Modal open={activeModal === 'createChannel'} onClose={handleClose}>
+      <div className="p-6">
         <h2 className="text-lg font-semibold text-gray-900">Create a channel</h2>
         <p className="mt-1 text-sm text-gray-500">
           Channels are where your team communicates about topics.
@@ -130,6 +126,6 @@ export function CreateChannelModal(): React.JSX.Element | null {
           </div>
         </form>
       </div>
-    </div>
+    </Modal>
   );
 }

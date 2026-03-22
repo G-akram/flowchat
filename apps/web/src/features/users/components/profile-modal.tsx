@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Button, Input } from '@flowchat/ui';
+import { Button, Input, Modal } from '@flowchat/ui';
 import { useAuthStore } from '@/stores/auth-store';
 import { useUpdateProfile } from '../api/use-update-profile';
 import { useUiStore } from '@/stores/ui-store';
@@ -42,10 +42,6 @@ export function ProfileModal(): React.JSX.Element | null {
     }
   }, [activeModal, user, reset]);
 
-  if (activeModal !== 'editProfile') {
-    return null;
-  }
-
   function onSubmit(values: ProfileFormValues): void {
     mutate({
       displayName: values.displayName,
@@ -54,8 +50,8 @@ export function ProfileModal(): React.JSX.Element | null {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
+    <Modal open={activeModal === 'editProfile'} onClose={closeModal}>
+      <div className="p-6">
         <h2 className="text-lg font-semibold text-gray-900">Edit Profile</h2>
 
         <form onSubmit={handleSubmit(onSubmit)} className="mt-4 space-y-4">
@@ -99,6 +95,6 @@ export function ProfileModal(): React.JSX.Element | null {
           </div>
         </form>
       </div>
-    </div>
+    </Modal>
   );
 }

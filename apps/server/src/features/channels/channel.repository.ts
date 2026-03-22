@@ -134,10 +134,12 @@ export interface ChannelMemberProfile {
   displayName: string;
   username: string;
   avatarUrl: string | null;
+  role: string;
 }
 
 export async function findChannelMemberProfiles(
-  channelId: string
+  channelId: string,
+  workspaceId: string
 ): Promise<ChannelMemberProfile[]> {
   const result = await db
     .select({
@@ -145,9 +147,17 @@ export async function findChannelMemberProfiles(
       displayName: users.displayName,
       username: users.username,
       avatarUrl: users.avatarUrl,
+      role: workspaceMembers.role,
     })
     .from(channelMembers)
     .innerJoin(users, eq(channelMembers.userId, users.id))
+    .innerJoin(
+      workspaceMembers,
+      and(
+        eq(workspaceMembers.userId, channelMembers.userId),
+        eq(workspaceMembers.workspaceId, workspaceId)
+      )
+    )
     .where(eq(channelMembers.channelId, channelId));
 
   return result;

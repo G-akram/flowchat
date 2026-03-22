@@ -277,7 +277,7 @@ export async function listMembers(
     throw new AppError('CHANNEL_NOT_FOUND', 'Channel not found', 404);
   }
 
-  return findChannelMemberProfiles(channelId);
+  return findChannelMemberProfiles(channelId, workspaceId);
 }
 
 export async function kickMember(

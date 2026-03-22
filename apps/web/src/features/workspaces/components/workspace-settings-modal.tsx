@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Button, Input } from '@flowchat/ui';
+import { Button, Input, Modal } from '@flowchat/ui';
 import { useUiStore } from '@/stores/ui-store';
 import { useAuthStore } from '@/stores/auth-store';
 import { useWorkspaces } from '../api/use-workspaces';
@@ -71,10 +71,6 @@ export function WorkspaceSettingsModal(): React.JSX.Element | null {
     }
   }, [activeModal, workspace, reset]);
 
-  if (activeModal !== 'workspaceSettings' || !workspace || !workspaceId) {
-    return null;
-  }
-
   function onRename(values: RenameFormValues): void {
     if (!workspaceId) return;
     updateWorkspace({ workspaceId, name: values.name });
@@ -100,9 +96,10 @@ export function WorkspaceSettingsModal(): React.JSX.Element | null {
     });
   }
 
+  const isOpen = activeModal === 'workspaceSettings' && Boolean(workspace) && Boolean(workspaceId);
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="w-full max-w-lg rounded-lg bg-white shadow-xl">
+    <Modal open={isOpen} onClose={closeModal} className="w-full max-w-lg rounded-lg bg-white shadow-xl">
         <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
           <h2 className="text-lg font-semibold text-gray-900">Workspace settings</h2>
           <button
@@ -176,7 +173,7 @@ export function WorkspaceSettingsModal(): React.JSX.Element | null {
             </section>
           )}
 
-          {isOwner && (
+          {isOwner && workspace && (
             <section className="border-t border-gray-200 pt-4">
               <h3 className="text-sm font-medium text-red-600">Danger zone</h3>
               <p className="mt-1 text-xs text-gray-500">
@@ -202,7 +199,6 @@ export function WorkspaceSettingsModal(): React.JSX.Element | null {
             </section>
           )}
         </div>
-      </div>
-    </div>
+    </Modal>
   );
 }
