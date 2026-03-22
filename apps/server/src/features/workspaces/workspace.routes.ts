@@ -3,6 +3,7 @@ import { validate } from '../../middleware/validate';
 import { authenticate } from '../../middleware/authenticate';
 import {
   createWorkspaceSchema,
+  updateWorkspaceSchema,
   workspaceParamsSchema,
   inviteMemberSchema,
 } from './workspace.schemas';
@@ -11,6 +12,9 @@ import {
   listWorkspacesHandler,
   getWorkspaceHandler,
   inviteMemberHandler,
+  updateWorkspaceHandler,
+  deleteWorkspaceHandler,
+  leaveWorkspaceHandler,
 } from './workspace.controller';
 import { listWorkspaceMembersHandler } from '../users/user.controller';
 
@@ -34,6 +38,21 @@ router.post(
   '/:workspaceId/members',
   validate({ params: workspaceParamsSchema, body: inviteMemberSchema }),
   inviteMemberHandler
+);
+router.patch(
+  '/:workspaceId',
+  validate({ params: workspaceParamsSchema, body: updateWorkspaceSchema }),
+  updateWorkspaceHandler
+);
+router.delete(
+  '/:workspaceId',
+  validate({ params: workspaceParamsSchema }),
+  deleteWorkspaceHandler
+);
+router.post(
+  '/:workspaceId/leave',
+  validate({ params: workspaceParamsSchema }),
+  leaveWorkspaceHandler
 );
 
 export { router as workspaceRouter };

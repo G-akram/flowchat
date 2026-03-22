@@ -11,6 +11,14 @@ import { useChannels } from '@/features/channels/api/use-channels';
 import { useDirectMessages } from '@/features/dm/api/use-direct-messages';
 import { NewDmModal } from '@/features/dm/components/new-dm-modal';
 import { SearchModal } from '@/features/search/components/search-modal';
+import { CreateWorkspaceModal } from '@/features/workspaces/components/create-workspace-modal';
+import { WorkspaceSettingsModal } from '@/features/workspaces/components/workspace-settings-modal';
+import { InviteMemberModal } from '@/features/workspaces/components/invite-member-modal';
+import { CreateChannelModal } from '@/features/channels/components/create-channel-modal';
+import { EditChannelModal } from '@/features/channels/components/edit-channel-modal';
+import { AddChannelMembersModal } from '@/features/channels/components/add-channel-members-modal';
+import { Button } from '@flowchat/ui';
+import { useUiStore } from '@/stores/ui-store';
 
 function ChannelPage(): React.JSX.Element {
   const { workspaceId, channelId } = useParams<{
@@ -75,17 +83,24 @@ function WorkspaceLayout(): React.JSX.Element {
       <ProfileModal />
       <NewDmModal />
       <SearchModal />
+      <CreateWorkspaceModal />
+      <WorkspaceSettingsModal />
+      <InviteMemberModal />
+      <CreateChannelModal />
+      <EditChannelModal />
+      <AddChannelMembersModal />
     </div>
   );
 }
 
 function WorkspaceRedirect(): React.JSX.Element {
   const { workspaces, isLoading } = useWorkspaces();
+  const openModal = useUiStore((s) => s.openModal);
 
   if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <p className="text-sm text-gray-400">Loading workspaces…</p>
+        <p className="text-sm text-gray-400">Loading workspaces\u2026</p>
       </div>
     );
   }
@@ -99,10 +114,17 @@ function WorkspaceRedirect(): React.JSX.Element {
   return (
     <div className="flex h-screen items-center justify-center">
       <div className="text-center">
-        <h2 className="text-lg font-semibold text-gray-900">No workspaces</h2>
+        <h2 className="text-lg font-semibold text-gray-900">Welcome to FlowChat</h2>
         <p className="mt-1 text-sm text-gray-500">
           Create a workspace to get started
         </p>
+        <Button
+          className="mt-4"
+          onClick={() => openModal('createWorkspace')}
+        >
+          Create a workspace
+        </Button>
+        <CreateWorkspaceModal />
       </div>
     </div>
   );

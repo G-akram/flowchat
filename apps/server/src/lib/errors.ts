@@ -15,6 +15,8 @@ export type ErrorCode =
   | 'MESSAGE_NOT_FOUND'
   | 'NOT_A_MEMBER'
   | 'ALREADY_A_MEMBER'
+  | 'CANNOT_LEAVE'
+  | 'CANNOT_DELETE'
   | 'RATE_LIMITED'
   | 'FILE_TOO_LARGE'
   | 'INVALID_FILE_TYPE'

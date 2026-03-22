@@ -1,4 +1,4 @@
-import { eq, and } from 'drizzle-orm';
+import { eq, and, count } from 'drizzle-orm';
 import { db } from '../../lib/db';
 import { workspaces, type DbWorkspace } from '../../db/schema/workspaces';
 import { workspaceMembers, type DbWorkspaceMember } from '../../db/schema/workspace-members';
@@ -104,4 +104,42 @@ export async function addChannelMember(input: {
   userId: string;
 }): Promise<void> {
   await db.insert(channelMembers).values(input);
+}
+
+export async function updateWorkspace(
+  id: string,
+  input: { name: string; slug: string }
+): Promise<DbWorkspace | undefined> {
+  const result = await db
+    .update(workspaces)
+    .set(input)
+    .where(eq(workspaces.id, id))
+    .returning();
+  return result[0];
+}
+
+export async function deleteWorkspace(id: string): Promise<void> {
+  await db.delete(workspaces).where(eq(workspaces.id, id));
+}
+
+export async function removeWorkspaceMember(
+  workspaceId: string,
+  userId: string
+): Promise<void> {
+  await db
+    .delete(workspaceMembers)
+    .where(
+      and(
+        eq(workspaceMembers.workspaceId, workspaceId),
+        eq(workspaceMembers.userId, userId)
+      )
+    );
+}
+
+export async function countWorkspaceMembers(workspaceId: string): Promise<number> {
+  const result = await db
+    .select({ value: count() })
+    .from(workspaceMembers)
+    .where(eq(workspaceMembers.workspaceId, workspaceId));
+  return result[0]?.value ?? 0;
 }

@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from 'express';
-import type { CreateChannelInput, ChannelParams, WorkspaceParams } from './channel.schemas';
-import { create, listByWorkspace, join, getById } from './channel.service';
+import type { CreateChannelInput, UpdateChannelInput, AddChannelMemberInput, ChannelParams, WorkspaceParams } from './channel.schemas';
+import { create, listByWorkspace, join, getById, update, remove, leave, addMember } from './channel.service';
 import { AppError } from '../../lib/errors';
 
 export async function createChannelHandler(
@@ -78,6 +78,86 @@ export async function getChannelHandler(
     const channel = await getById(req.params.workspaceId, req.params.channelId, user.id);
 
     res.status(200).json({ data: { channel } });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function updateChannelHandler(
+  req: Request<ChannelParams, unknown, UpdateChannelInput>,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const user = req.user;
+
+    if (!user) {
+      throw new AppError('UNAUTHORIZED', 'Not authenticated', 401);
+    }
+
+    const channel = await update(req.params.workspaceId, req.params.channelId, req.body, user.id);
+
+    res.status(200).json({ data: { channel } });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function deleteChannelHandler(
+  req: Request<ChannelParams>,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const user = req.user;
+
+    if (!user) {
+      throw new AppError('UNAUTHORIZED', 'Not authenticated', 401);
+    }
+
+    await remove(req.params.workspaceId, req.params.channelId, user.id);
+
+    res.status(204).send();
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function leaveChannelHandler(
+  req: Request<ChannelParams>,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const user = req.user;
+
+    if (!user) {
+      throw new AppError('UNAUTHORIZED', 'Not authenticated', 401);
+    }
+
+    await leave(req.params.workspaceId, req.params.channelId, user.id);
+
+    res.status(204).send();
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function addChannelMemberHandler(
+  req: Request<ChannelParams, unknown, AddChannelMemberInput>,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const user = req.user;
+
+    if (!user) {
+      throw new AppError('UNAUTHORIZED', 'Not authenticated', 401);
+    }
+
+    await addMember(req.params.workspaceId, req.params.channelId, req.body, user.id);
+
+    res.status(201).json({ data: { success: true } });
   } catch (err) {
     next(err);
   }

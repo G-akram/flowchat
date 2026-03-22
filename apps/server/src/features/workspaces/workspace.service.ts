@@ -1,5 +1,5 @@
 import { AppError } from '../../lib/errors';
-import type { CreateWorkspaceInput, InviteMemberInput } from './workspace.schemas';
+import type { CreateWorkspaceInput, UpdateWorkspaceInput, InviteMemberInput } from './workspace.schemas';
 import {
   createWorkspace as createWorkspaceInDb,
   findWorkspaceById,
@@ -10,6 +10,9 @@ import {
   findUserByEmail,
   createChannel,
   addChannelMember,
+  updateWorkspace as updateWorkspaceInDb,
+  deleteWorkspace as deleteWorkspaceInDb,
+  removeWorkspaceMember,
 } from './workspace.repository';
 import type { DbWorkspace } from '../../db/schema/workspaces';
 
@@ -147,4 +150,74 @@ export async function inviteMember(
   });
 
   return { userId: member.userId, role: member.role };
+}
+
+export async function update(
+  workspaceId: string,
+  input: UpdateWorkspaceInput,
+  userId: string
+): Promise<WorkspaceResponse> {
+  const workspace = await findWorkspaceById(workspaceId);
+
+  if (!workspace) {
+    throw new AppError('WORKSPACE_NOT_FOUND', 'Workspace not found', 404);
+  }
+
+  const member = await findWorkspaceMember(workspaceId, userId);
+
+  if (!member || (member.role !== 'owner' && member.role !== 'admin')) {
+    throw new AppError('FORBIDDEN', 'Only owners and admins can update workspaces', 403);
+  }
+
+  const slug = await generateUniqueSlug(input.name);
+
+  const updated = await updateWorkspaceInDb(workspaceId, { name: input.name, slug });
+
+  if (!updated) {
+    throw new AppError('WORKSPACE_NOT_FOUND', 'Workspace not found', 404);
+  }
+
+  return mapWorkspace(updated);
+}
+
+export async function remove(
+  workspaceId: string,
+  userId: string
+): Promise<void> {
+  const workspace = await findWorkspaceById(workspaceId);
+
+  if (!workspace) {
+    throw new AppError('WORKSPACE_NOT_FOUND', 'Workspace not found', 404);
+  }
+
+  const member = await findWorkspaceMember(workspaceId, userId);
+
+  if (!member || member.role !== 'owner') {
+    throw new AppError('FORBIDDEN', 'Only the workspace owner can delete it', 403);
+  }
+
+  await deleteWorkspaceInDb(workspaceId);
+}
+
+export async function leave(
+  workspaceId: string,
+  userId: string
+): Promise<void> {
+  const workspace = await findWorkspaceById(workspaceId);
+
+  if (!workspace) {
+    throw new AppError('WORKSPACE_NOT_FOUND', 'Workspace not found', 404);
+  }
+
+  const member = await findWorkspaceMember(workspaceId, userId);
+
+  if (!member) {
+    throw new AppError('NOT_A_MEMBER', 'You are not a member of this workspace', 403);
+  }
+
+  if (member.role === 'owner') {
+    throw new AppError('CANNOT_LEAVE', 'Workspace owner cannot leave. Transfer ownership or delete the workspace.', 400);
+  }
+
+  await removeWorkspaceMember(workspaceId, userId);
 }

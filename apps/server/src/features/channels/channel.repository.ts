@@ -76,14 +76,45 @@ export async function findChannelMember(
   return result[0];
 }
 
+export async function updateChannel(
+  id: string,
+  input: { name?: string; description?: string | null }
+): Promise<DbChannel | undefined> {
+  const result = await db
+    .update(channels)
+    .set(input)
+    .where(eq(channels.id, id))
+    .returning();
+  return result[0];
+}
+
+export async function deleteChannel(id: string): Promise<void> {
+  await db.delete(channels).where(eq(channels.id, id));
+}
+
+export async function removeChannelMember(
+  channelId: string,
+  userId: string
+): Promise<void> {
+  await db
+    .delete(channelMembers)
+    .where(
+      and(
+        eq(channelMembers.channelId, channelId),
+        eq(channelMembers.userId, userId)
+      )
+    );
+}
+
 export async function findWorkspaceMember(
   workspaceId: string,
   userId: string
-): Promise<{ workspaceId: string; userId: string } | undefined> {
+): Promise<{ workspaceId: string; userId: string; role: string } | undefined> {
   const result = await db
     .select({
       workspaceId: workspaceMembers.workspaceId,
       userId: workspaceMembers.userId,
+      role: workspaceMembers.role,
     })
     .from(workspaceMembers)
     .where(

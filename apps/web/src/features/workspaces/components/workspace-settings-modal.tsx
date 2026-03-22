@@ -1,0 +1,208 @@
+import React, { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { useNavigate, useParams } from 'react-router-dom';
+import { Button, Input } from '@flowchat/ui';
+import { useUiStore } from '@/stores/ui-store';
+import { useAuthStore } from '@/stores/auth-store';
+import { useWorkspaces } from '../api/use-workspaces';
+import { useUpdateWorkspace } from '../api/use-update-workspace';
+import { useDeleteWorkspace } from '../api/use-delete-workspace';
+import { useLeaveWorkspace } from '../api/use-leave-workspace';
+
+const renameSchema = z.object({
+  name: z
+    .string()
+    .min(1, 'Workspace name is required')
+    .max(64, 'Workspace name must be at most 64 characters'),
+});
+
+type RenameFormValues = z.infer<typeof renameSchema>;
+
+export function WorkspaceSettingsModal(): React.JSX.Element | null {
+  const activeModal = useUiStore((s) => s.activeModal);
+  const closeModal = useUiStore((s) => s.closeModal);
+  const { workspaceId } = useParams<{ workspaceId: string }>();
+  const navigate = useNavigate();
+  const user = useAuthStore((s) => s.user);
+  const { workspaces } = useWorkspaces();
+  const workspace = workspaces?.find((w) => w.id === workspaceId);
+  const isOwner = workspace?.ownerId === user?.id;
+
+  const [deleteConfirm, setDeleteConfirm] = useState('');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const { mutate: updateWorkspace, isPending: isUpdating } = useUpdateWorkspace({
+    onSuccess: () => {
+      closeModal();
+    },
+  });
+
+  const { mutate: deleteWorkspace, isPending: isDeleting } = useDeleteWorkspace({
+    onSuccess: () => {
+      closeModal();
+      navigate('/app');
+    },
+  });
+
+  const { mutate: leaveWorkspace, isPending: isLeaving } = useLeaveWorkspace({
+    onSuccess: () => {
+      closeModal();
+      navigate('/app');
+    },
+  });
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<RenameFormValues>({
+    resolver: zodResolver(renameSchema),
+    defaultValues: { name: workspace?.name ?? '' },
+  });
+
+  useEffect(() => {
+    if (activeModal === 'workspaceSettings' && workspace) {
+      reset({ name: workspace.name });
+      setDeleteConfirm('');
+      setErrorMessage(null);
+    }
+  }, [activeModal, workspace, reset]);
+
+  if (activeModal !== 'workspaceSettings' || !workspace || !workspaceId) {
+    return null;
+  }
+
+  function onRename(values: RenameFormValues): void {
+    if (!workspaceId) return;
+    updateWorkspace({ workspaceId, name: values.name });
+  }
+
+  function handleDelete(): void {
+    if (!workspaceId) return;
+    setErrorMessage(null);
+    deleteWorkspace(workspaceId, {
+      onError: (err) => {
+        setErrorMessage(err.response?.data?.error?.message ?? 'Failed to delete workspace');
+      },
+    });
+  }
+
+  function handleLeave(): void {
+    if (!workspaceId) return;
+    setErrorMessage(null);
+    leaveWorkspace(workspaceId, {
+      onError: (err) => {
+        setErrorMessage(err.response?.data?.error?.message ?? 'Failed to leave workspace');
+      },
+    });
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+      <div className="w-full max-w-lg rounded-lg bg-white shadow-xl">
+        <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+          <h2 className="text-lg font-semibold text-gray-900">Workspace settings</h2>
+          <button
+            type="button"
+            className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+            onClick={closeModal}
+          >
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <div className="space-y-6 p-6">
+          {errorMessage && (
+            <div className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+              {errorMessage}
+            </div>
+          )}
+
+          {isOwner && (
+            <section>
+              <h3 className="text-sm font-medium text-gray-900">Rename workspace</h3>
+              <form onSubmit={handleSubmit(onRename)} className="mt-2 flex gap-2">
+                <div className="flex-1">
+                  <Input
+                    {...register('name')}
+                    error={errors.name?.message}
+                  />
+                </div>
+                <Button type="submit" isLoading={isUpdating} size="sm">
+                  Rename
+                </Button>
+              </form>
+            </section>
+          )}
+
+          <section>
+            <h3 className="text-sm font-medium text-gray-900">Invite members</h3>
+            <p className="mt-1 text-xs text-gray-500">Add teammates to this workspace.</p>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="mt-2"
+              onClick={() => {
+                closeModal();
+                useUiStore.getState().openModal('inviteMembers');
+              }}
+            >
+              Invite by email
+            </Button>
+          </section>
+
+          {!isOwner && (
+            <section className="border-t border-gray-200 pt-4">
+              <h3 className="text-sm font-medium text-gray-900">Leave workspace</h3>
+              <p className="mt-1 text-xs text-gray-500">
+                You will lose access to all channels and messages in this workspace.
+              </p>
+              <Button
+                type="button"
+                variant="destructive"
+                size="sm"
+                className="mt-2"
+                isLoading={isLeaving}
+                onClick={handleLeave}
+              >
+                Leave workspace
+              </Button>
+            </section>
+          )}
+
+          {isOwner && (
+            <section className="border-t border-gray-200 pt-4">
+              <h3 className="text-sm font-medium text-red-600">Danger zone</h3>
+              <p className="mt-1 text-xs text-gray-500">
+                This will permanently delete the workspace, all channels, and all messages. This action cannot be undone.
+              </p>
+              <div className="mt-2 space-y-2">
+                <Input
+                  placeholder={`Type "${workspace.name}" to confirm`}
+                  value={deleteConfirm}
+                  onChange={(e) => setDeleteConfirm(e.target.value)}
+                />
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="sm"
+                  isLoading={isDeleting}
+                  disabled={deleteConfirm !== workspace.name}
+                  onClick={handleDelete}
+                >
+                  Delete workspace
+                </Button>
+              </div>
+            </section>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

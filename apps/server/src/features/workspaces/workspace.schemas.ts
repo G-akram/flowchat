@@ -15,6 +15,14 @@ export const inviteMemberSchema = z.object({
   email: z.string().email('Invalid email address'),
 });
 
+export const updateWorkspaceSchema = z.object({
+  name: z
+    .string()
+    .min(1, 'Workspace name is required')
+    .max(64, 'Workspace name must be at most 64 characters'),
+});
+
 export type CreateWorkspaceInput = z.infer<typeof createWorkspaceSchema>;
+export type UpdateWorkspaceInput = z.infer<typeof updateWorkspaceSchema>;
 export type WorkspaceParams = z.infer<typeof workspaceParamsSchema>;
 export type InviteMemberInput = z.infer<typeof inviteMemberSchema>;

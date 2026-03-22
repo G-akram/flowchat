@@ -3,6 +3,8 @@ import { validate } from '../../middleware/validate';
 import { authenticate } from '../../middleware/authenticate';
 import {
   createChannelSchema,
+  updateChannelSchema,
+  addChannelMemberSchema,
   channelParamsSchema,
   workspaceParamsSchema,
 } from './channel.schemas';
@@ -11,6 +13,10 @@ import {
   listChannelsHandler,
   joinChannelHandler,
   getChannelHandler,
+  updateChannelHandler,
+  deleteChannelHandler,
+  leaveChannelHandler,
+  addChannelMemberHandler,
 } from './channel.controller';
 
 const router: ExpressRouter = Router({ mergeParams: true });
@@ -36,6 +42,26 @@ router.get(
   '/:channelId',
   validate({ params: channelParamsSchema }),
   getChannelHandler
+);
+router.patch(
+  '/:channelId',
+  validate({ params: channelParamsSchema, body: updateChannelSchema }),
+  updateChannelHandler
+);
+router.delete(
+  '/:channelId',
+  validate({ params: channelParamsSchema }),
+  deleteChannelHandler
+);
+router.post(
+  '/:channelId/leave',
+  validate({ params: channelParamsSchema }),
+  leaveChannelHandler
+);
+router.post(
+  '/:channelId/members',
+  validate({ params: channelParamsSchema, body: addChannelMemberSchema }),
+  addChannelMemberHandler
 );
 
 export { router as channelRouter };

@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from 'express';
-import type { CreateWorkspaceInput, WorkspaceParams, InviteMemberInput } from './workspace.schemas';
-import { create, listByUser, getById, inviteMember } from './workspace.service';
+import type { CreateWorkspaceInput, UpdateWorkspaceInput, WorkspaceParams, InviteMemberInput } from './workspace.schemas';
+import { create, listByUser, getById, inviteMember, update, remove, leave } from './workspace.service';
 import { AppError } from '../../lib/errors';
 
 export async function createWorkspaceHandler(
@@ -78,6 +78,66 @@ export async function inviteMemberHandler(
     const member = await inviteMember(req.params.workspaceId, req.body, user.id);
 
     res.status(201).json({ data: { member } });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function updateWorkspaceHandler(
+  req: Request<WorkspaceParams, unknown, UpdateWorkspaceInput>,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const user = req.user;
+
+    if (!user) {
+      throw new AppError('UNAUTHORIZED', 'Not authenticated', 401);
+    }
+
+    const workspace = await update(req.params.workspaceId, req.body, user.id);
+
+    res.status(200).json({ data: { workspace } });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function deleteWorkspaceHandler(
+  req: Request<WorkspaceParams>,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const user = req.user;
+
+    if (!user) {
+      throw new AppError('UNAUTHORIZED', 'Not authenticated', 401);
+    }
+
+    await remove(req.params.workspaceId, user.id);
+
+    res.status(204).send();
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function leaveWorkspaceHandler(
+  req: Request<WorkspaceParams>,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const user = req.user;
+
+    if (!user) {
+      throw new AppError('UNAUTHORIZED', 'Not authenticated', 401);
+    }
+
+    await leave(req.params.workspaceId, user.id);
+
+    res.status(204).send();
   } catch (err) {
     next(err);
   }
