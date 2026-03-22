@@ -1,4 +1,5 @@
 import axios, { type AxiosInstance, type AxiosError, type InternalAxiosRequestConfig } from 'axios';
+import { toast } from 'sonner';
 
 const BASE_URL = (import.meta.env['VITE_API_URL'] as string | undefined) ?? '/api';
 
@@ -47,6 +48,13 @@ function processQueue(err: unknown, token: string | null): void {
 apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
+    if (!error.response && error.code === 'ERR_NETWORK') {
+      toast.error('Network error', {
+        description: 'Unable to reach the server. Check your connection.',
+        id: 'network-error',
+      });
+    }
+
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
     const isAuthRequest = originalRequest.url?.includes('/auth/login') ||

@@ -1,9 +1,12 @@
-import express, { type Express } from 'express';
+import crypto from 'crypto';
+import express, { type Express, type Request, type Response } from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import pinoHttp from 'pino-http';
 import { env } from './lib/env';
 import { logger } from './lib/logger';
+import { pool } from './lib/db';
+import { redis } from './lib/redis';
 import { errorHandler } from './middleware/error-handler';
 import { defaultRateLimit } from './middleware/rate-limit';
 import { authRouter } from './features/auth/auth.routes';
@@ -22,6 +25,11 @@ export const app: Express = express();
 app.use(
   pinoHttp({
     logger,
+    genReqId: (_req, res) => {
+      const id = crypto.randomUUID();
+      res.setHeader('X-Request-Id', id);
+      return id;
+    },
     redact: ['req.headers.authorization', 'req.headers.cookie'],
   })
 );
@@ -37,8 +45,36 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(defaultRateLimit);
 
-app.get('/health', (_req, res) => {
-  res.status(200).json({ data: { status: 'ok' } });
+app.get('/api/health', async (_req: Request, res: Response) => {
+  let dbConnected = false;
+  let redisConnected = false;
+
+  try {
+    const client = await pool.connect();
+    client.release();
+    dbConnected = true;
+  } catch {
+    dbConnected = false;
+  }
+
+  try {
+    const pong = await redis.ping();
+    redisConnected = pong === 'PONG';
+  } catch {
+    redisConnected = false;
+  }
+
+  const status = dbConnected && redisConnected ? 'ok' : 'degraded';
+  const statusCode = status === 'ok' ? 200 : 503;
+
+  res.status(statusCode).json({
+    data: {
+      status,
+      timestamp: new Date().toISOString(),
+      dbConnected,
+      redisConnected,
+    },
+  });
 });
 
 app.use('/api/auth', authRouter);

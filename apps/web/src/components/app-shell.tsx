@@ -4,9 +4,13 @@ import { useAuthStore } from '@/stores/auth-store';
 import { useWorkspaces } from '@/features/workspaces/api/use-workspaces';
 import { ChannelView } from '@/features/messages/components/channel-view';
 import { Sidebar } from '@/components/sidebar';
+import { ErrorBoundary } from '@/components/error-boundary';
+import { ConnectionStatus } from '@/components/connection-status';
 import { usePresence } from '@/hooks/use-presence';
 import { useHeartbeat } from '@/hooks/use-heartbeat';
 import { useWorkspaceSocket } from '@/hooks/use-workspace-socket';
+import { usePageTitle } from '@/hooks/use-page-title';
+import { useKeyboardNavigation } from '@/hooks/use-keyboard-navigation';
 import { ProfileModal } from '@/features/users/components/profile-modal';
 import { useChannels } from '@/features/channels/api/use-channels';
 import { useDirectMessages } from '@/features/dm/api/use-direct-messages';
@@ -32,6 +36,16 @@ function ChannelPage(): React.JSX.Element {
   const { channels } = useChannels(workspaceId);
   const { dms } = useDirectMessages(workspaceId);
 
+  const channel = channels?.find((c) => c.id === channelId);
+  const dm = dms?.find((d) => d.id === channelId);
+  const isDm = Boolean(dm);
+  const displayName = dm
+    ? dm.otherUser.displayName
+    : channel?.name ?? undefined;
+
+  const pageTitle = isDm ? displayName : displayName ? `#${displayName}` : undefined;
+  usePageTitle(pageTitle);
+
   if (!channelId) {
     return (
       <div className="flex h-full items-center justify-center">
@@ -39,13 +53,6 @@ function ChannelPage(): React.JSX.Element {
       </div>
     );
   }
-
-  const channel = channels?.find((c) => c.id === channelId);
-  const dm = dms?.find((d) => d.id === channelId);
-  const isDm = Boolean(dm);
-  const displayName = dm
-    ? dm.otherUser.displayName
-    : channel?.name ?? undefined;
 
   return <ChannelView channelId={channelId} channelName={displayName} isDm={isDm} />;
 }
@@ -73,17 +80,25 @@ function WorkspaceLayout(): React.JSX.Element {
   usePresence(workspaceId);
   useHeartbeat();
   useWorkspaceSocket(workspaceId);
+  useKeyboardNavigation();
 
   return (
-    <div className="flex h-screen bg-background text-foreground">
-      <Sidebar />
+    <div className="flex h-screen flex-col bg-background text-foreground">
+      <ConnectionStatus />
+      <div className="flex flex-1 overflow-hidden">
+        <ErrorBoundary>
+          <Sidebar />
+        </ErrorBoundary>
 
-      <main className="flex flex-1 flex-col overflow-hidden">
-        <Routes>
-          <Route path=":channelId" element={<ChannelPage />} />
-          <Route path="*" element={<WelcomePage />} />
-        </Routes>
-      </main>
+        <main className="flex flex-1 flex-col overflow-hidden">
+          <ErrorBoundary>
+            <Routes>
+              <Route path=":channelId" element={<ChannelPage />} />
+              <Route path="*" element={<WelcomePage />} />
+            </Routes>
+          </ErrorBoundary>
+        </main>
+      </div>
 
       <ProfileModal />
       <NewDmModal />

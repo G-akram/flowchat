@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useCallback, useState } from 'react';
-import { useMessages } from '../api/use-messages';
+import { useQueryClient } from '@tanstack/react-query';
+import { useMessages, messagesQueryKey } from '../api/use-messages';
 import { MessageItem } from './message-item';
 import type { DisplayMessage } from '../types';
 
@@ -38,6 +39,7 @@ export function MessageList({
   highlightMessageId,
   onHighlightComplete,
 }: MessageListProps): React.JSX.Element {
+  const queryClient = useQueryClient();
   const {
     data,
     fetchNextPage,
@@ -135,8 +137,16 @@ export function MessageList({
 
   if (isLoading) {
     return (
-      <div className="flex flex-1 items-center justify-center">
-        <div className="text-sm text-muted-foreground">Loading messages...</div>
+      <div className="flex flex-1 flex-col justify-end gap-3 p-4">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="flex items-start gap-3">
+            <div className="h-8 w-8 shrink-0 animate-pulse rounded-full bg-muted" />
+            <div className="flex-1 space-y-2">
+              <div className="h-3 w-24 animate-pulse rounded bg-muted" />
+              <div className="h-3 animate-pulse rounded bg-muted" style={{ width: `${40 + Math.random() * 50}%` }} />
+            </div>
+          </div>
+        ))}
       </div>
     );
   }
@@ -144,7 +154,18 @@ export function MessageList({
   if (isError) {
     return (
       <div className="flex flex-1 items-center justify-center">
-        <div className="text-sm text-destructive">Failed to load messages</div>
+        <div className="text-center">
+          <p className="text-sm text-destructive">Failed to load messages</p>
+          <button
+            type="button"
+            className="mt-3 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+            onClick={() => {
+              void queryClient.invalidateQueries({ queryKey: messagesQueryKey(channelId) });
+            }}
+          >
+            Retry
+          </button>
+        </div>
       </div>
     );
   }

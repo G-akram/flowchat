@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
+import { toast } from 'sonner';
 import { apiClient } from '@/lib/api-client';
 import { useAuthStore } from '@/stores/auth-store';
 import type { User, ApiError } from '@flowchat/types';
@@ -44,6 +45,7 @@ export function useUpdateProfile(options?: UseUpdateProfileOptions): UseUpdatePr
     onSuccess: (user) => {
       setUser(user);
       void queryClient.invalidateQueries({ queryKey: ['me'] });
+      toast.success('Profile updated');
       options?.onSuccess?.();
     },
   });

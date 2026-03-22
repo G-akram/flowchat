@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient, type InfiniteData } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { apiClient } from '@/lib/api-client';
 import { useAuthStore } from '@/stores/auth-store';
 import type { MessageWithUser } from '../types';
@@ -127,6 +128,10 @@ export function useSendMessage() {
             ),
           })),
         };
+      });
+
+      toast.error('Failed to send message', {
+        description: 'Your message could not be delivered. You can retry from the message.',
       });
     },
   });
