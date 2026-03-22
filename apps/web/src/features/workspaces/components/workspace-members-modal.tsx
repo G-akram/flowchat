@@ -8,6 +8,7 @@ import { useWorkspaces } from '../api/use-workspaces';
 import { useKickWorkspaceMember } from '../api/use-kick-workspace-member';
 import { useOpenDm } from '@/features/dm/api/use-open-dm';
 import { PresenceDot } from '@/components/presence-dot';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 
 const ROLE_LABELS: Record<string, string> = {
   owner: 'Owner',
@@ -38,6 +39,7 @@ export function WorkspaceMembersModal(): React.JSX.Element {
   const workspace = workspaces?.find((w) => w.id === workspaceId);
   const [search, setSearch] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [pendingKick, setPendingKick] = useState<{ userId: string; displayName: string } | null>(null);
 
   const currentMember = members?.find((m) => m.id === currentUser?.id);
   const canKick = currentMember?.role === 'owner' || currentMember?.role === 'admin';
@@ -63,13 +65,18 @@ export function WorkspaceMembersModal(): React.JSX.Element {
   function handleKick(e: React.MouseEvent, userId: string, displayName: string): void {
     e.stopPropagation();
     if (!workspaceId) return;
-    if (!window.confirm(`Remove ${displayName} from this workspace?`)) return;
+    setPendingKick({ userId, displayName });
+  }
 
+  function confirmKick(): void {
+    if (!workspaceId || !pendingKick) return;
     setErrorMessage(null);
     kickMember(
-      { workspaceId, userId },
+      { workspaceId, userId: pendingKick.userId },
       {
+        onSuccess: () => setPendingKick(null),
         onError: (err) => {
+          setPendingKick(null);
           setErrorMessage(err.response?.data?.error?.message ?? 'Failed to remove member');
         },
       }
@@ -90,111 +97,122 @@ export function WorkspaceMembersModal(): React.JSX.Element {
   function handleClose(): void {
     setSearch('');
     setErrorMessage(null);
+    setPendingKick(null);
     closeModal();
   }
 
   return (
-    <Modal open={activeModal === 'workspaceMembers'} onClose={handleClose}>
-      <div className="flex items-center justify-between border-b border-border px-6 py-4">
-        <div>
-          <h2 className="text-lg font-semibold text-foreground">Members</h2>
-          <p className="text-sm text-muted-foreground">
-            {workspace?.name} &middot; {members?.length ?? 0} members
-          </p>
+    <>
+      <ConfirmDialog
+        open={Boolean(pendingKick)}
+        title="Remove member"
+        message={`Remove ${pendingKick?.displayName ?? ''} from this workspace?`}
+        confirmLabel="Remove"
+        isLoading={isKicking}
+        onConfirm={confirmKick}
+        onCancel={() => setPendingKick(null)}
+      />
+      <Modal open={activeModal === 'workspaceMembers'} onClose={handleClose}>
+        <div className="flex items-center justify-between border-b border-border px-6 py-4">
+          <div>
+            <h2 className="text-lg font-semibold text-foreground">Members</h2>
+            <p className="text-sm text-muted-foreground">
+              {workspace?.name} &middot; {members?.length ?? 0} members
+            </p>
+          </div>
+          <button
+            type="button"
+            className="rounded p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
+            onClick={handleClose}
+          >
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
-        <button
-          type="button"
-          className="rounded p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
-          onClick={handleClose}
-        >
-          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      </div>
 
-      <div className="px-4 pt-3">
-        <Input
-          placeholder="Search by name or username..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          autoFocus
-        />
-      </div>
+        <div className="px-4 pt-3">
+          <Input
+            placeholder="Search by name or username..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            autoFocus
+          />
+        </div>
 
-      <div className="p-4">
-        {errorMessage && (
-          <div className="mb-3 rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
-            {errorMessage}
-          </div>
-        )}
+        <div className="p-4">
+          {errorMessage && (
+            <div className="mb-3 rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
+              {errorMessage}
+            </div>
+          )}
 
-        {isLoading ? (
-          <div className="space-y-2">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="h-12 animate-pulse rounded bg-muted" />
-            ))}
-          </div>
-        ) : filtered.length === 0 ? (
-          <p className="py-4 text-center text-sm text-muted-foreground">
-            {search ? 'No members match your search' : 'No members'}
-          </p>
-        ) : (
-          <ul className="max-h-72 space-y-0.5 overflow-y-auto">
-            {filtered.map((member) => {
-              const isCurrentUser = member.id === currentUser?.id;
-              const isOwner = member.role === 'owner';
-              const showKick = canKick && !isCurrentUser && !isOwner &&
-                (currentMember?.role === 'owner' || member.role !== 'admin');
+          {isLoading ? (
+            <div className="space-y-2">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="h-12 animate-pulse rounded bg-muted" />
+              ))}
+            </div>
+          ) : filtered.length === 0 ? (
+            <p className="py-4 text-center text-sm text-muted-foreground">
+              {search ? 'No members match your search' : 'No members'}
+            </p>
+          ) : (
+            <ul className="max-h-72 space-y-0.5 overflow-y-auto">
+              {filtered.map((member) => {
+                const isCurrentUser = member.id === currentUser?.id;
+                const isOwner = member.role === 'owner';
+                const showKick = canKick && !isCurrentUser && !isOwner &&
+                  (currentMember?.role === 'owner' || member.role !== 'admin');
 
-              return (
-                <li
-                  key={member.id}
-                  className={`flex items-center justify-between rounded-md px-3 py-2 ${isCurrentUser ? 'hover:bg-accent' : 'cursor-pointer hover:bg-accent'}`}
-                  onClick={() => handleMemberClick(member.id)}
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <PresenceDot userId={member.id} size="sm" />
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="truncate text-sm font-medium text-foreground">
-                          {member.displayName}
-                        </span>
-                        {isCurrentUser && (
-                          <span className="shrink-0 text-xs text-muted-foreground">(you)</span>
-                        )}
-                        <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${ROLE_COLORS[member.role] ?? ROLE_COLORS['member']}`}>
-                          {ROLE_LABELS[member.role] ?? member.role}
-                        </span>
+                return (
+                  <li
+                    key={member.id}
+                    className={`flex items-center justify-between rounded-md px-3 py-2 ${isCurrentUser ? 'hover:bg-accent' : 'cursor-pointer hover:bg-accent'}`}
+                    onClick={() => handleMemberClick(member.id)}
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <PresenceDot userId={member.id} size="sm" />
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="truncate text-sm font-medium text-foreground">
+                            {member.displayName}
+                          </span>
+                          {isCurrentUser && (
+                            <span className="shrink-0 text-xs text-muted-foreground">(you)</span>
+                          )}
+                          <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${ROLE_COLORS[member.role] ?? ROLE_COLORS['member']}`}>
+                            {ROLE_LABELS[member.role] ?? member.role}
+                          </span>
+                        </div>
+                        <span className="text-xs text-muted-foreground">@{member.username}</span>
                       </div>
-                      <span className="text-xs text-muted-foreground">@{member.username}</span>
                     </div>
-                  </div>
-                  {showKick && (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      isLoading={isKicking}
-                      onClick={(e) => handleKick(e, member.id, member.displayName)}
-                      className="shrink-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                    >
-                      Remove
-                    </Button>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </div>
-
-      <div className="border-t border-border px-6 py-3">
-        <div className="flex justify-end">
-          <Button variant="outline" onClick={handleClose}>
-            Done
-          </Button>
+                    {showKick && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={(e) => handleKick(e, member.id, member.displayName)}
+                        className="shrink-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                      >
+                        Remove
+                      </Button>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </div>
-      </div>
-    </Modal>
+
+        <div className="border-t border-border px-6 py-3">
+          <div className="flex justify-end">
+            <Button variant="outline" onClick={handleClose}>
+              Done
+            </Button>
+          </div>
+        </div>
+      </Modal>
+    </>
   );
 }

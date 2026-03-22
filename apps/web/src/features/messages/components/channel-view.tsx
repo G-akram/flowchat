@@ -1,4 +1,5 @@
 import React, { useCallback, useState, useRef, useEffect } from 'react';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 import { useQueryClient, type InfiniteData } from '@tanstack/react-query';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useChannelSocket } from '@/hooks/use-channel-socket';
@@ -46,6 +47,7 @@ function ChannelHeaderMenu({
   canManage: boolean;
 }): React.JSX.Element {
   const [isOpen, setIsOpen] = useState(false);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const { workspaceId } = useParams<{ workspaceId: string }>();
   const navigate = useNavigate();
@@ -154,9 +156,7 @@ function ChannelHeaderMenu({
               className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-destructive hover:bg-destructive/10"
               onClick={() => {
                 setIsOpen(false);
-                if (workspaceId && window.confirm(`Delete #${channelName}? This cannot be undone.`)) {
-                  deleteChannel({ workspaceId, channelId });
-                }
+                setConfirmDeleteOpen(true);
               }}
             >
               Delete channel
@@ -164,6 +164,17 @@ function ChannelHeaderMenu({
           )}
         </div>
       )}
+      <ConfirmDialog
+        open={confirmDeleteOpen}
+        title="Delete channel"
+        message={`Delete #${channelName}? This cannot be undone.`}
+        confirmLabel="Delete"
+        onConfirm={() => {
+          setConfirmDeleteOpen(false);
+          if (workspaceId) deleteChannel({ workspaceId, channelId });
+        }}
+        onCancel={() => setConfirmDeleteOpen(false)}
+      />
     </div>
   );
 }

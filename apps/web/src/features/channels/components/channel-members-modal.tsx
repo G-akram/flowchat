@@ -8,6 +8,7 @@ import { useChannels } from '../api/use-channels';
 import { useKickChannelMember } from '../api/use-kick-channel-member';
 import { useOpenDm } from '@/features/dm/api/use-open-dm';
 import { PresenceDot } from '@/components/presence-dot';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 
 const ROLE_LABELS: Record<string, string> = {
   owner: 'Owner',
@@ -41,6 +42,7 @@ export function ChannelMembersModal(): React.JSX.Element {
   const channel = channels?.find((c) => c.id === channelId);
   const [search, setSearch] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [pendingKick, setPendingKick] = useState<{ userId: string; displayName: string } | null>(null);
 
   const currentMember = members?.find((m) => m.id === currentUser?.id);
   const currentRole = currentMember?.role;
@@ -68,13 +70,18 @@ export function ChannelMembersModal(): React.JSX.Element {
   function handleKick(e: React.MouseEvent, userId: string, displayName: string): void {
     e.stopPropagation();
     if (!workspaceId || !channelId) return;
-    if (!window.confirm(`Remove ${displayName} from #${channel?.name}?`)) return;
+    setPendingKick({ userId, displayName });
+  }
 
+  function confirmKick(): void {
+    if (!workspaceId || !channelId || !pendingKick) return;
     setErrorMessage(null);
     kickMember(
-      { workspaceId, channelId, userId },
+      { workspaceId, channelId, userId: pendingKick.userId },
       {
+        onSuccess: () => setPendingKick(null),
         onError: (err) => {
+          setPendingKick(null);
           setErrorMessage(err.response?.data?.error?.message ?? 'Failed to remove member');
         },
       }
@@ -95,10 +102,21 @@ export function ChannelMembersModal(): React.JSX.Element {
   function handleClose(): void {
     setSearch('');
     setErrorMessage(null);
+    setPendingKick(null);
     closeModal();
   }
 
   return (
+    <>
+    <ConfirmDialog
+      open={Boolean(pendingKick)}
+      title="Remove member"
+      message={`Remove ${pendingKick?.displayName ?? ''} from #${channel?.name}?`}
+      confirmLabel="Remove"
+      isLoading={isKicking}
+      onConfirm={confirmKick}
+      onCancel={() => setPendingKick(null)}
+    />
     <Modal open={activeModal === 'channelMembers' && Boolean(channelId)} onClose={handleClose}>
       <div className="flex items-center justify-between border-b border-border px-6 py-4">
         <div>
@@ -177,7 +195,6 @@ export function ChannelMembersModal(): React.JSX.Element {
                     <Button
                       size="sm"
                       variant="ghost"
-                      isLoading={isKicking}
                       onClick={(e) => handleKick(e, member.id, member.displayName)}
                       className="shrink-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
                     >
@@ -199,5 +216,6 @@ export function ChannelMembersModal(): React.JSX.Element {
         </div>
       </div>
     </Modal>
+    </>
   );
 }
