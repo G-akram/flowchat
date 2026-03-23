@@ -14,10 +14,8 @@ const httpServer = http.createServer(app);
 
 initSocketServer(httpServer);
 
-async function runMigrationsIfDev(): Promise<void> {
-  if (env.NODE_ENV !== 'development') return;
-
-  logger.info('Running database migrations (development mode)...');
+async function runMigrations(): Promise<void> {
+  logger.info('Running database migrations...');
   const migrationDb = drizzle(pool);
   await migrate(migrationDb, {
     migrationsFolder: path.join(__dirname, '../drizzle'),
@@ -26,10 +24,10 @@ async function runMigrationsIfDev(): Promise<void> {
 }
 
 async function start(): Promise<void> {
-  await runMigrationsIfDev();
+  await runMigrations();
   await redis.connect();
 
-  httpServer.listen(env.PORT, () => {
+  httpServer.listen(env.PORT, '0.0.0.0', () => {
     logger.info({ port: env.PORT, env: env.NODE_ENV }, 'Server started');
   });
 }

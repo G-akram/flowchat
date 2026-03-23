@@ -25,4 +25,4 @@ COPY --from=builder /app/apps/server ./apps/server
 
 WORKDIR /app/apps/server
 EXPOSE 4000
-CMD ["sh", "-c", "node dist/db/migrate.js && node dist/server.js"]
+CMD ["node", "apps/server/dist/server.js"]
