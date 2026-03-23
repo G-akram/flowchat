@@ -37,7 +37,7 @@ ReactDOM.createRoot(rootElement).render(
     >
       <QueryClientProvider client={queryClient}>
         <App />
-        {import.meta.env.DEV && <ColorCustomizer />}
+        <ColorCustomizer />
         <Toaster
           position="bottom-right"
           closeButton
