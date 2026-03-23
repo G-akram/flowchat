@@ -1,0 +1,7 @@
+{
+  "buildCommand": "pnpm turbo run build --filter=@flowchat/web",
+  "outputDirectory": "apps/web/dist",
+  "installCommand": "pnpm install",
+  "framework": null,
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+}
