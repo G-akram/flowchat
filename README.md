@@ -1,6 +1,6 @@
 # FlowChat
 
-A production-grade Slack clone featuring real-time messaging, workspaces, channels, direct messages, presence tracking, emoji reactions, file uploads, and in-app notifications — built as a portfolio project demonstrating full-stack TypeScript architecture.
+A production-grade Slack clone featuring real-time messaging, workspaces, channels, direct messages, presence tracking, emoji reactions, file uploads, and in-app notifications 
 
 <!-- TODO: Replace with an actual screenshot -->
 
