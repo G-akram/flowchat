@@ -34,5 +34,6 @@ async function start(): Promise<void> {
 
 start().catch((err: unknown) => {
   logger.error({ err }, 'Failed to start server');
+  console.error('STARTUP FAILED:', err);
   process.exit(1);
 });
