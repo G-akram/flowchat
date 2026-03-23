@@ -32,6 +32,7 @@ Monorepo (Turborepo) with a React/Vite frontend, Node.js backend, and shared pac
 ## Tech Stack
 
 ### Frontend (apps/web)
+
 - React 18 + Vite + TypeScript
 - Tailwind CSS + shadcn/ui
 - TanStack Query v5 (server state)
@@ -40,6 +41,7 @@ Monorepo (Turborepo) with a React/Vite frontend, Node.js backend, and shared pac
 - Socket.IO client
 
 ### Backend (apps/server)
+
 - Node.js + Express + TypeScript
 - Drizzle ORM + drizzle-kit (migrations)
 - PostgreSQL
@@ -50,6 +52,7 @@ Monorepo (Turborepo) with a React/Vite frontend, Node.js backend, and shared pac
 - Zod (all input validation)
 
 ### Infrastructure
+
 - Docker Compose (local: Postgres + Redis)
 - S3-compatible storage (file uploads — add last)
 
@@ -133,6 +136,7 @@ apps/web/src/
 ## Code Quality Rules
 
 ### TypeScript
+
 - `strict: true` in all tsconfigs — no exceptions
 - Explicit return types on all functions and methods
 - No `any`. Use `unknown` and narrow it.
@@ -140,6 +144,7 @@ apps/web/src/
 - Use `satisfies` operator when validating object literals against types
 
 ### Naming Conventions
+
 - `camelCase` → variables, functions, methods
 - `PascalCase` → React components, TypeScript types/interfaces
 - `kebab-case` → file names (e.g., `auth.service.ts`, `message-list.tsx`)
@@ -147,6 +152,7 @@ apps/web/src/
 - `camelCase` → Zod schema instances (e.g., `loginSchema`, `createChannelSchema`)
 
 ### File Conventions
+
 - Max ~200 lines per file. Extract when approaching this limit.
 - One primary export per file.
 - No barrel `index.ts` files unless the package boundary requires it.
@@ -159,11 +165,13 @@ apps/web/src/
 ### Response Shape
 
 Success:
+
 ```json
 { "data": { ... } }
 ```
 
 Error:
+
 ```json
 { "error": { "code": "VALIDATION_ERROR", "message": "...", "field": "email" } }
 ```
@@ -172,11 +180,13 @@ Error:
 - HTTP status codes must be semantically correct (201 for creates, 204 for deletes, etc.)
 
 ### Pagination
+
 - Use **cursor-based pagination** for all list endpoints (never offset-based)
 - Query params: `cursor` (last item ID) + `limit` (default 50, max 100)
 - Response includes `nextCursor: string | null`
 
 ### Auth
+
 - Access token: JWT, 15-minute expiry, sent in `Authorization: Bearer` header
 - Refresh token: opaque, 7-day expiry, stored in httpOnly Secure cookie
 - Socket auth: pass access token in socket handshake `auth` object
@@ -186,6 +196,7 @@ Error:
 ## Realtime (Socket.IO) Rules
 
 ### Typed Events
+
 Define all event names as constants in `socket/events.ts`. Never use raw strings.
 
 ```typescript
@@ -201,11 +212,14 @@ export const SOCKET_EVENTS = {
 ```
 
 ### Cache Update Pattern
+
 When a socket event is received on the frontend:
+
 1. Do NOT refetch — manually update the React Query cache
 2. Use `queryClient.setQueryData` or `queryClient.invalidateQueries` only when consistency is critical
 
 ### Optimistic Updates (message send)
+
 1. Optimistically insert the message into the React Query cache with a temp ID
 2. Fire the API call
 3. On success: replace temp message with server response
@@ -217,11 +231,13 @@ When a socket event is received on the frontend:
 ## Error Handling
 
 ### Backend
+
 - Custom `AppError` class: `new AppError('CHANNEL_NOT_FOUND', 'Channel not found', 404)`
 - All thrown `AppError` instances are caught by the global error handler in `middleware/error-handler.ts`
 - Unexpected errors are logged with Pino and returned as `INTERNAL_ERROR` (never leak stack traces)
 
 ### Frontend
+
 - API errors map to the `{ error: { code, message, field? } }` shape
 - React Query `onError` callbacks show toasts for non-form errors
 - Form errors use React Hook Form's `setError` with the `field` from the response
@@ -298,10 +314,10 @@ export const env = envSchema.parse(process.env);
 
 ## Output Rules for Claude Code
 
-- Return **complete, working files** — no truncation, no `// ... rest of file`
 - Follow the existing folder structure exactly
-- When editing an existing file, return the complete updated file
 - No explanations inside code (comments should be rare and meaningful)
 - No `// eslint-disable` unless absolutely unavoidable — fix the root cause
 - When creating a new feature, always create: route + controller + service + repository + schema
 - When creating a new frontend feature, always create: api hook + component + types
+- Make **surgical edits** — show only the changed code with enough surrounding context to locate it. Use `// CHANGED START` and `// CHANGED END` markers to delimit edits. These markers are navigation aids, not code comments — always remove them from the final file.
+- Only return a complete file if more than 50% of it changed.
