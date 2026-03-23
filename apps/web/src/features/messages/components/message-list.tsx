@@ -48,22 +48,15 @@ export function MessageList({
   onDelete,
 }: MessageListProps): React.JSX.Element {
   const queryClient = useQueryClient();
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    isLoading,
-    isError,
-  } = useMessages(channelId);
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError } =
+    useMessages(channelId);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   const isNearBottom = useRef(true);
   const previousScrollHeight = useRef(0);
 
-  const messages: DisplayMessage[] = data
-    ? data.pages.flatMap((page) => page.data).reverse()
-    : [];
+  const messages: DisplayMessage[] = data ? data.pages.flatMap((page) => page.data).reverse() : [];
 
   const checkIfNearBottom = useCallback((): boolean => {
     const container = scrollContainerRef.current;
@@ -85,6 +78,22 @@ export function MessageList({
       scrollToBottom();
     }
   }, [messages.length, scrollToBottom]);
+
+  useEffect(() => {
+    const content = contentRef.current;
+    if (!content) return;
+
+    const observer = new ResizeObserver(() => {
+      if (isNearBottom.current) {
+        scrollToBottom();
+      }
+    });
+
+    observer.observe(content);
+    return (): void => {
+      observer.disconnect();
+    };
+  }, [scrollToBottom, data]);
 
   useEffect(() => {
     scrollToBottom();
@@ -115,7 +124,14 @@ export function MessageList({
       previousScrollHeight.current = container.scrollHeight;
       void fetchNextPage();
     }
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage, checkIfNearBottom, newMessageFlag, onClearNewMessageFlag]);
+  }, [
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+    checkIfNearBottom,
+    newMessageFlag,
+    onClearNewMessageFlag,
+  ]);
 
   const handleNewMessagesClick = useCallback((): void => {
     scrollToBottom();
@@ -151,7 +167,10 @@ export function MessageList({
             <div className="h-8 w-8 shrink-0 animate-pulse rounded-full bg-muted" />
             <div className="flex-1 space-y-2">
               <div className="h-3 w-24 animate-pulse rounded bg-muted" />
-              <div className="h-3 animate-pulse rounded bg-muted" style={{ width: `${40 + Math.random() * 50}%` }} />
+              <div
+                className="h-3 animate-pulse rounded bg-muted"
+                style={{ width: `${40 + Math.random() * 50}%` }}
+              />
             </div>
           </div>
         ))}
@@ -180,11 +199,7 @@ export function MessageList({
 
   return (
     <div className="relative flex-1 overflow-hidden">
-      <div
-        ref={scrollContainerRef}
-        className="h-full overflow-y-auto"
-        onScroll={handleScroll}
-      >
+      <div ref={scrollContainerRef} className="h-full overflow-y-auto" onScroll={handleScroll}>
         {isFetchingNextPage && (
           <div className="py-3 text-center">
             <span className="text-xs text-muted-foreground">Loading older messages...</span>
@@ -203,12 +218,10 @@ export function MessageList({
           </div>
         )}
 
-        <div className="pb-2">
+        <div ref={contentRef} className="pb-2">
           {messages.map((message, index) => {
             const previousMessage = index > 0 ? messages[index - 1] : undefined;
-            const isCompact = previousMessage
-              ? shouldGroup(message, previousMessage)
-              : false;
+            const isCompact = previousMessage ? shouldGroup(message, previousMessage) : false;
 
             return (
               <MessageItem
