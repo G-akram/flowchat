@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { Avatar, Button } from '@flowchat/ui';
 import { PresenceDot } from '@/components/presence-dot';
-import type { DisplayMessage } from '../types';
+import type { DisplayMessage, ReactionData } from '../types';
 import { isOptimisticMessage } from '../types';
 import { ReactionBar } from './reaction-bar';
 import { EmojiPicker } from './emoji-picker';
@@ -15,6 +15,8 @@ interface MessageItemProps {
   onToggleReaction: (messageId: string, emoji: string, hasReacted: boolean) => void;
   onUserClick?: ((userId: string) => void) | undefined;
   isHighlighted?: boolean | undefined;
+  isDm?: boolean | undefined;
+  currentUserId?: string | undefined;
 }
 
 function formatTime(dateString: string): string {
@@ -30,10 +32,13 @@ export const MessageItem = React.memo(function MessageItem({
   onToggleReaction,
   onUserClick,
   isHighlighted = false,
+  isDm = false,
+  currentUserId,
 }: MessageItemProps): React.JSX.Element {
   const isFailed = isOptimisticMessage(message) && message.status === 'failed';
   const isSending = isOptimisticMessage(message) && message.status === 'sending';
   const isOptimistic = isOptimisticMessage(message);
+  const isSelf = isDm && message.user.id === currentUserId;
   const [showPicker, setShowPicker] = useState(false);
 
   const reactions = useMemo(() => message.reactions ?? [], [message.reactions]);
@@ -54,11 +59,98 @@ export const MessageItem = React.memo(function MessageItem({
     [message.id, reactions, onToggleReaction]
   );
 
+  const highlightClass = isHighlighted ? 'bg-yellow-500/15 transition-colors duration-1000' : '';
+
+  if (isDm) {
+    return (
+      <DmMessageItem
+        message={message}
+        isCompact={isCompact}
+        isSelf={isSelf}
+        isSending={isSending}
+        isFailed={isFailed}
+        isOptimistic={isOptimistic}
+        highlightClass={highlightClass}
+        reactions={reactions}
+        hasReactions={hasReactions}
+        showPicker={showPicker}
+        onSetShowPicker={setShowPicker}
+        onUserClick={onUserClick}
+        onToggle={handleToggle}
+        onPickerSelect={handlePickerSelect}
+        onRetry={onRetry}
+        onRemoveFailed={onRemoveFailed}
+      />
+    );
+  }
+
+  return (
+    <ChannelMessageItem
+      message={message}
+      isCompact={isCompact}
+      isSending={isSending}
+      isFailed={isFailed}
+      isOptimistic={isOptimistic}
+      highlightClass={highlightClass}
+      reactions={reactions}
+      hasReactions={hasReactions}
+      showPicker={showPicker}
+      onSetShowPicker={setShowPicker}
+      onUserClick={onUserClick}
+      onToggle={handleToggle}
+      onPickerSelect={handlePickerSelect}
+      onRetry={onRetry}
+      onRemoveFailed={onRemoveFailed}
+    />
+  );
+});
+
+MessageItem.displayName = 'MessageItem';
+
+interface InternalProps {
+  message: DisplayMessage;
+  isCompact: boolean;
+  isSending: boolean;
+  isFailed: boolean;
+  isOptimistic: boolean;
+  highlightClass: string;
+  reactions: ReactionData[];
+  hasReactions: boolean;
+  showPicker: boolean;
+  onSetShowPicker: React.Dispatch<React.SetStateAction<boolean>>;
+  onUserClick?: ((userId: string) => void) | undefined;
+  onToggle: (emoji: string, hasReacted: boolean) => void;
+  onPickerSelect: (emoji: string) => void;
+  onRetry: ((tempId: string, content: string) => void) | undefined;
+  onRemoveFailed: ((tempId: string) => void) | undefined;
+}
+
+interface DmInternalProps extends InternalProps {
+  isSelf: boolean;
+}
+
+function ChannelMessageItem({
+  message,
+  isCompact,
+  isSending,
+  isFailed,
+  isOptimistic,
+  highlightClass,
+  reactions,
+  hasReactions,
+  showPicker,
+  onSetShowPicker,
+  onUserClick,
+  onToggle,
+  onPickerSelect,
+  onRetry,
+  onRemoveFailed,
+}: InternalProps): React.JSX.Element {
   const addButton = !isOptimistic && (
     <button
       type="button"
-      className="invisible absolute -top-3 right-2 z-10 inline-flex h-6 items-center gap-1 rounded border border-border bg-popover px-1.5 text-xs text-muted-foreground shadow-sm transition-colors hover:border-border hover:text-foreground group-hover/msg:visible"
-      onClick={() => setShowPicker((prev) => !prev)}
+      className="invisible absolute -top-3 right-0 z-10 inline-flex h-6 items-center gap-1 rounded border border-border bg-popover px-1.5 text-xs text-muted-foreground shadow-sm transition-colors hover:border-border hover:text-foreground group-hover/msg:visible"
+      onClick={() => onSetShowPicker((prev) => !prev)}
     >
       <span className="text-sm leading-none">😀</span>
       <span className="leading-none">+</span>
@@ -66,33 +158,24 @@ export const MessageItem = React.memo(function MessageItem({
   );
 
   const picker = showPicker && (
-    <EmojiPicker
-      onSelect={handlePickerSelect}
-      onClose={() => setShowPicker(false)}
-    />
+    <EmojiPicker onSelect={onPickerSelect} onClose={() => onSetShowPicker(() => false)} />
   );
-
-  const highlightClass = isHighlighted ? 'bg-yellow-500/15 transition-colors duration-1000' : '';
 
   if (isCompact) {
     return (
       <div
         id={`message-${message.id}`}
-        className={`group/msg relative flex items-start gap-3 px-4 py-0.5 hover:bg-accent/50 ${isFailed ? 'bg-destructive/10' : ''} ${highlightClass}`}
+        className={`group/msg flex items-start gap-3 px-4 py-0.5 hover:bg-accent/50 ${isFailed ? 'bg-destructive/10' : ''} ${highlightClass}`}
       >
-        {addButton}
-        {picker}
-
         <div className="w-8 shrink-0 pt-0.5 text-center">
           <span className="invisible text-xs text-muted-foreground group-hover/msg:visible">
             {formatTime(message.createdAt)}
           </span>
         </div>
-
-        <div className="min-w-0 flex-1">
-          <p
-            className={`text-sm text-foreground break-words ${isSending ? 'opacity-50' : ''}`}
-          >
+        <div className="relative min-w-0 flex-1">
+          {addButton}
+          {picker}
+          <p className={`text-sm text-foreground break-words ${isSending ? 'opacity-50' : ''}`}>
             {message.content}
           </p>
           {message.attachments && message.attachments.length > 0 && (
@@ -106,9 +189,7 @@ export const MessageItem = React.memo(function MessageItem({
               onRemove={onRemoveFailed}
             />
           )}
-          {hasReactions && (
-            <ReactionBar reactions={reactions} onToggle={handleToggle} />
-          )}
+          {hasReactions && <ReactionBar reactions={reactions} onToggle={onToggle} />}
         </div>
       </div>
     );
@@ -117,50 +198,36 @@ export const MessageItem = React.memo(function MessageItem({
   return (
     <div
       id={`message-${message.id}`}
-      className={`group/msg relative flex items-start gap-3 px-4 pt-2 pb-1 hover:bg-accent/50 ${isFailed ? 'bg-destructive/10' : ''} ${highlightClass}`}
+      className={`group/msg flex items-start gap-3 px-4 pt-2 pb-1 hover:bg-accent/50 ${isFailed ? 'bg-destructive/10' : ''} ${highlightClass}`}
     >
-      {addButton}
-      {picker}
-
       <button
         type="button"
         className="relative shrink-0 pt-0.5 cursor-pointer"
         onClick={() => onUserClick?.(message.user.id)}
         title={`Message ${message.user.displayName}`}
       >
-        <Avatar
-          src={message.user.avatarUrl}
-          alt={message.user.displayName}
-          size="sm"
-        />
+        <Avatar src={message.user.avatarUrl} alt={message.user.displayName} size="sm" />
         <span className="absolute -bottom-0.5 -right-0.5">
           <PresenceDot userId={message.user.id} size="sm" />
         </span>
       </button>
 
-      <div className="min-w-0 flex-1">
+      <div className="relative min-w-0 flex-1">
+        {addButton}
+        {picker}
         <div className="flex items-baseline gap-2">
-          <span className="text-sm font-semibold text-foreground">
-            {message.user.displayName}
-          </span>
-          <span className="text-xs text-muted-foreground">
-            {formatTime(message.createdAt)}
-          </span>
+          <span className="text-sm font-semibold text-foreground">{message.user.displayName}</span>
+          <span className="text-xs text-muted-foreground">{formatTime(message.createdAt)}</span>
           {message.editedAt && (
             <span className="text-xs text-muted-foreground">(edited)</span>
           )}
         </div>
-
-        <p
-          className={`text-sm text-foreground break-words ${isSending ? 'opacity-50' : ''}`}
-        >
+        <p className={`text-sm text-foreground break-words ${isSending ? 'opacity-50' : ''}`}>
           {message.content}
         </p>
-
         {message.attachments && message.attachments.length > 0 && (
           <MessageAttachments attachments={message.attachments} />
         )}
-
         {isFailed && (
           <FailedActions
             tempId={(message as { tempId: string }).tempId}
@@ -169,16 +236,139 @@ export const MessageItem = React.memo(function MessageItem({
             onRemove={onRemoveFailed}
           />
         )}
-
-        {hasReactions && (
-          <ReactionBar reactions={reactions} onToggle={handleToggle} />
-        )}
+        {hasReactions && <ReactionBar reactions={reactions} onToggle={onToggle} />}
       </div>
     </div>
   );
-});
+}
 
-MessageItem.displayName = 'MessageItem';
+function DmMessageItem({
+  message,
+  isCompact,
+  isSelf,
+  isSending,
+  isFailed,
+  isOptimistic,
+  highlightClass,
+  reactions,
+  hasReactions,
+  showPicker,
+  onSetShowPicker,
+  onUserClick,
+  onToggle,
+  onPickerSelect,
+  onRetry,
+  onRemoveFailed,
+}: DmInternalProps): React.JSX.Element {
+  const addButton = !isOptimistic && (
+    <button
+      type="button"
+      className={`invisible absolute -top-3 z-10 inline-flex h-6 items-center gap-1 rounded border border-border bg-popover px-1.5 text-xs text-muted-foreground shadow-sm transition-colors hover:border-border hover:text-foreground group-hover/msg:visible ${isSelf ? 'left-0' : 'right-0'}`}
+      onClick={() => onSetShowPicker((prev) => !prev)}
+    >
+      <span className="text-sm leading-none">😀</span>
+      <span className="leading-none">+</span>
+    </button>
+  );
+
+  const picker = showPicker && (
+    <EmojiPicker
+      onSelect={onPickerSelect}
+      onClose={() => onSetShowPicker(() => false)}
+      alignLeft={isSelf}
+    />
+  );
+
+  const bubbleClass = isSelf
+    ? 'rounded-2xl rounded-tr-sm bg-primary px-3 py-2'
+    : 'rounded-2xl rounded-tl-sm bg-muted px-3 py-2';
+
+  const textClass = isSelf
+    ? `text-sm text-primary-foreground break-words ${isSending ? 'opacity-60' : ''}`
+    : `text-sm text-foreground break-words ${isSending ? 'opacity-50' : ''}`;
+
+  const rowClass = isSelf
+    ? 'flex-row-reverse'
+    : 'flex-row';
+
+  if (isCompact) {
+    return (
+      <div
+        id={`message-${message.id}`}
+        className={`group/msg flex ${rowClass} items-end gap-3 px-4 py-0.5 hover:bg-accent/50 ${isFailed ? 'bg-destructive/10' : ''} ${highlightClass}`}
+      >
+        <div className="w-8 shrink-0" />
+        <div className="relative min-w-0 max-w-[75%]">
+          {addButton}
+          {picker}
+          <div className={bubbleClass}>
+            <p className={textClass}>{message.content}</p>
+            {message.attachments && message.attachments.length > 0 && (
+              <MessageAttachments attachments={message.attachments} />
+            )}
+            {isFailed && (
+              <FailedActions
+                tempId={(message as { tempId: string }).tempId}
+                content={message.content}
+                onRetry={onRetry}
+                onRemove={onRemoveFailed}
+              />
+            )}
+          </div>
+          {hasReactions && <ReactionBar reactions={reactions} onToggle={onToggle} />}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      id={`message-${message.id}`}
+      className={`group/msg flex ${rowClass} items-end gap-3 px-4 pt-2 pb-1 hover:bg-accent/50 ${isFailed ? 'bg-destructive/10' : ''} ${highlightClass}`}
+    >
+      <button
+        type="button"
+        className="relative shrink-0 cursor-pointer"
+        onClick={() => onUserClick?.(message.user.id)}
+        title={`Message ${message.user.displayName}`}
+      >
+        <Avatar src={message.user.avatarUrl} alt={message.user.displayName} size="sm" />
+        <span className="absolute -bottom-0.5 -right-0.5">
+          <PresenceDot userId={message.user.id} size="sm" />
+        </span>
+      </button>
+
+      <div className="relative min-w-0 max-w-[75%]">
+        {addButton}
+        {picker}
+        <div className={`flex items-baseline gap-2 mb-0.5 ${isSelf ? 'justify-end' : ''}`}>
+          {!isSelf && (
+            <span className="text-sm font-semibold text-foreground">{message.user.displayName}</span>
+          )}
+          <span className="text-xs text-muted-foreground">{formatTime(message.createdAt)}</span>
+          {message.editedAt && (
+            <span className="text-xs text-muted-foreground">(edited)</span>
+          )}
+        </div>
+        <div className={bubbleClass}>
+          <p className={textClass}>{message.content}</p>
+          {message.attachments && message.attachments.length > 0 && (
+            <MessageAttachments attachments={message.attachments} />
+          )}
+          {isFailed && (
+            <FailedActions
+              tempId={(message as { tempId: string }).tempId}
+              content={message.content}
+              onRetry={onRetry}
+              onRemove={onRemoveFailed}
+            />
+          )}
+        </div>
+        {hasReactions && <ReactionBar reactions={reactions} onToggle={onToggle} />}
+      </div>
+    </div>
+  );
+}
 
 interface FailedActionsProps {
   tempId: string;

@@ -1,18 +1,49 @@
 import React, { useRef, useEffect } from 'react';
 
 const COMMON_EMOJIS = [
-  '👍', '👎', '❤️', '😂', '😮', '😢', '😡', '🎉',
-  '🔥', '👀', '🙌', '💯', '✅', '❌', '🚀', '💡',
-  '🤔', '👏', '😍', '🙏', '💪', '😎', '🤝', '⭐',
-  '🎯', '💀', '😅', '🫡', '👋', '🤣',
+  '👍',
+  '👎',
+  '❤️',
+  '😂',
+  '😮',
+  '😢',
+  '😡',
+  '🎉',
+  '🔥',
+  '👀',
+  '🙌',
+  '💯',
+  '✅',
+  '❌',
+  '🚀',
+  '💡',
+  '🤔',
+  '👏',
+  '😍',
+  '🙏',
+  '💪',
+  '😎',
+  '🤝',
+  '⭐',
+  '🎯',
+  '💀',
+  '😅',
+  '🫡',
+  '👋',
+  '🤣',
 ] as const;
 
 interface EmojiPickerProps {
   onSelect: (emoji: string) => void;
   onClose: () => void;
+  alignLeft?: boolean | undefined;
 }
 
-export function EmojiPicker({ onSelect, onClose }: EmojiPickerProps): React.JSX.Element {
+export function EmojiPicker({
+  onSelect,
+  onClose,
+  alignLeft = false,
+}: EmojiPickerProps): React.JSX.Element {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -40,7 +71,7 @@ export function EmojiPicker({ onSelect, onClose }: EmojiPickerProps): React.JSX.
   return (
     <div
       ref={containerRef}
-      className="absolute right-2 top-0 z-20 w-56 -translate-y-full rounded-lg border border-border bg-popover p-2 shadow-xl"
+      className={`absolute top-0 z-20 w-56 -translate-y-full rounded-lg border border-border bg-popover p-2 shadow-xl ${alignLeft ? '-left-0' : '-right-0'}`}
     >
       <div className="grid grid-cols-8 gap-0.5">
         {COMMON_EMOJIS.map((emoji) => (

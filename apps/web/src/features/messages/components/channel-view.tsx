@@ -145,6 +145,8 @@ export function ChannelView({ channelId, channelName, isDm = false }: ChannelVie
         onHighlightComplete={(): void => {
           setSearchParams({}, { replace: true });
         }}
+        isDm={isDm}
+        currentUserId={currentUser?.id}
       />
 
       <TypingIndicator typingUsers={typingUsers} />
