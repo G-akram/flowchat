@@ -25,6 +25,7 @@ import { AddChannelMembersModal } from '@/features/channels/components/add-chann
 import { WorkspaceMembersModal } from '@/features/workspaces/components/workspace-members-modal';
 import { ChannelMembersModal } from '@/features/channels/components/channel-members-modal';
 import { ChannelSettingsModal } from '@/features/channels/components/channel-settings-modal';
+import { MediaViewer } from '@/features/uploads/components/media-viewer';
 import { Button } from '@flowchat/ui';
 import { useUiStore } from '@/stores/ui-store';
 
@@ -112,6 +113,7 @@ function WorkspaceLayout(): React.JSX.Element {
       <WorkspaceMembersModal />
       <ChannelMembersModal />
       <ChannelSettingsModal />
+      <MediaViewer />
     </div>
   );
 }

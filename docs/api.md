@@ -541,7 +541,7 @@ Send a message to a channel.
 
 #### PATCH `/api/channels/:channelId/messages/:messageId`
 
-Edit a message. Only the message author can edit.
+Edit a message. **Only the message author can edit their own messages.**
 
 **Request Body:**
 
@@ -549,15 +549,37 @@ Edit a message. Only the message author can edit.
 { "content": "Updated message text" }
 ```
 
-**Response (200):** Updated message object.
+| Field     | Type   | Rules                       |
+| --------- | ------ | --------------------------- |
+| `content` | string | 1–4000 characters, required |
+
+**Response (200):** Full updated message object (same shape as `GET` response), with `editedAt` set to the current timestamp.
+
+**Error responses:**
+
+| Code        | Status | When                                          |
+| ----------- | ------ | --------------------------------------------- |
+| `FORBIDDEN` | 403    | Authenticated user is not the message author  |
+| `NOT_FOUND` | 404    | Message or channel does not exist             |
+
+**Side effect:** Broadcasts `message:updated` to the `channel:{channelId}` Socket.IO room so all connected clients update their cache without refetching.
 
 ---
 
 #### DELETE `/api/channels/:channelId/messages/:messageId`
 
-Delete a message.
+Delete a message. **Only the message author can delete their own messages.**
 
 **Response (204):** No body.
+
+**Error responses:**
+
+| Code        | Status | When                                          |
+| ----------- | ------ | --------------------------------------------- |
+| `FORBIDDEN` | 403    | Authenticated user is not the message author  |
+| `NOT_FOUND` | 404    | Message or channel does not exist             |
+
+**Side effect:** Broadcasts `message:deleted` to the `channel:{channelId}` Socket.IO room so all connected clients immediately remove the message from their cache.
 
 ---
 

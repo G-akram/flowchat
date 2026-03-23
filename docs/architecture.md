@@ -418,3 +418,18 @@ Access tokens are stored in a JavaScript variable (not localStorage or cookies) 
 ### No barrel files
 
 The codebase avoids `index.ts` barrel files to keep imports explicit and improve tree-shaking. Each file has one primary export, and imports reference the file directly.
+
+### Message ownership enforced at the service layer
+
+Edit and delete operations verify `message.userId === requestingUserId` inside `message.service.ts` before reaching the repository. The check is not in the controller (HTTP concern) or the repository (data concern) — it is business logic and lives in the service. This means the same check applies whether the operation is triggered via REST or any future interface.
+
+The service throws `AppError('FORBIDDEN', ..., 403)` on ownership failure, which the global error handler converts to the standard `{ error: { code, message } }` response shape.
+
+### In-app media viewer — zero dependencies
+
+Images and PDFs open in a full-screen overlay instead of a new browser tab. The viewer is built without third-party viewer libraries:
+
+- **Images** — CSS `transform: scale() translate()` with cursor-centered zoom math. A non-passive `wheel` event listener (required by modern browsers to call `preventDefault`) is attached directly to the DOM via `useEffect`. Zoom and pan state is managed with `useReducer` to keep all transitions in a single pure reducer with no side effects.
+- **PDFs** — Native browser `<iframe>` pointing at the Supabase Storage URL. Supported in all modern browsers; leverages the built-in PDF engine (Chrome PDFium, Firefox, Safari). Zero client-side processing.
+- **Gallery** — Each message's previewable attachments (images + PDFs) form a gallery. The active item index and item list live in a Zustand store (`useMediaViewerStore`) — ephemeral UI state, never server state.
+- **Architecture** — The viewer mounts once in `WorkspaceLayout` as a portal to `document.body` at `z-[300]` (above all modals). Any component can open it by calling `useMediaViewerStore((s) => s.open)` — no prop drilling required.

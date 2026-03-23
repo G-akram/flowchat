@@ -14,10 +14,12 @@ A production-grade Slack clone featuring real-time messaging, workspaces, channe
 - **Channels** — public and private channels within a workspace
 - **Direct Messages** — 1-on-1 conversations between workspace members
 - **Real-time Messaging** — instant delivery via Socket.IO with optimistic UI updates
+- **Message Editing & Deletion** — inline editing with confirmation dialog; edits and deletes broadcast in real time to all channel members
 - **Presence** — live online / away / offline indicators with heartbeat
 - **Typing Indicators** — see who is typing in a channel
 - **Emoji Reactions** — react to any message with any emoji
 - **File Uploads** — attach images, PDFs, and text files (up to 2 MB) via Supabase Storage
+- **In-app Media Viewer** — full-screen image lightbox with zoom/pan and gallery navigation; native PDF reader; zero third-party viewer dependencies
 - **Message Search** — full-text search across workspace messages (PostgreSQL `tsvector`)
 - **Notifications** — in-app notifications for channel invites, workspace membership changes
 - **Auth** — email/password registration with JWT access tokens and rotating refresh tokens
