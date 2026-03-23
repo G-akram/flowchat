@@ -3,14 +3,21 @@ import { useTheme } from '@/hooks/use-theme';
 
 function Icon({ d, className }: { d: string; className?: string }): React.JSX.Element {
   return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <svg
+      className={className}
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={2}
+    >
       <path strokeLinecap="round" strokeLinejoin="round" d={d} />
     </svg>
   );
 }
 
 const ICON_PATHS = {
-  palette: 'M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01',
+  palette:
+    'M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01',
   x: 'M6 18L18 6M6 6l12 12',
   copy: 'M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z',
   check: 'M5 13l4 4L19 7',
@@ -28,11 +35,7 @@ const RELATED_VARS: Record<string, string[]> = {
 };
 
 function hslStringToHex(hslStr: string): string {
-  const [h = 0, s = 0, l = 0] = hslStr
-    .replace(/%/g, '')
-    .trim()
-    .split(/\s+/)
-    .map(Number);
+  const [h = 0, s = 0, l = 0] = hslStr.replace(/%/g, '').trim().split(/\s+/).map(Number);
   const sNorm = s / 100;
   const lNorm = l / 100;
   const a = sNorm * Math.min(lNorm, 1 - lNorm);
@@ -87,12 +90,31 @@ function generateCssBlock(): string {
   const isDark = document.documentElement.classList.contains('dark');
   const selector = isDark ? '.dark' : ':root';
   const names = [
-    'background', 'foreground', 'card', 'card-foreground', 'popover',
-    'popover-foreground', 'primary', 'primary-foreground', 'secondary',
-    'secondary-foreground', 'muted', 'muted-foreground', 'accent',
-    'accent-foreground', 'destructive', 'destructive-foreground', 'border',
-    'input', 'ring', 'sidebar', 'sidebar-foreground', 'sidebar-border',
-    'sidebar-accent', 'sidebar-accent-foreground', 'sidebar-muted-foreground',
+    'background',
+    'foreground',
+    'card',
+    'card-foreground',
+    'popover',
+    'popover-foreground',
+    'primary',
+    'primary-foreground',
+    'secondary',
+    'secondary-foreground',
+    'muted',
+    'muted-foreground',
+    'accent',
+    'accent-foreground',
+    'destructive',
+    'destructive-foreground',
+    'border',
+    'input',
+    'ring',
+    'sidebar',
+    'sidebar-foreground',
+    'sidebar-border',
+    'sidebar-accent',
+    'sidebar-accent-foreground',
+    'sidebar-muted-foreground',
   ];
   const style = getComputedStyle(document.documentElement);
   const lines = names
@@ -132,9 +154,7 @@ function ColorRow({ label, cssVar, value, onChange }: ColorRowProps): React.JSX.
         <p className="text-xs font-medium text-popover-foreground">{label}</p>
         <p className="font-mono text-[11px] text-muted-foreground">{cssVar}</p>
       </div>
-      <span className="font-mono text-[11px] text-muted-foreground">
-        {hex.toUpperCase()}
-      </span>
+      <span className="font-mono text-[11px] text-muted-foreground">{hex.toUpperCase()}</span>
     </div>
   );
 }
@@ -146,9 +166,7 @@ export function ColorCustomizer(): React.JSX.Element | null {
 
   const defaults = DEFAULTS[resolvedTheme];
 
-  const [primary, setPrimary] = useState<string>(
-    () => getVar('--primary') || defaults.primary
-  );
+  const [primary, setPrimary] = useState<string>(() => getVar('--primary') || defaults.primary);
   const [background, setBackground] = useState<string>(
     () => getVar('--background') || defaults.background
   );
@@ -183,16 +201,16 @@ export function ColorCustomizer(): React.JSX.Element | null {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="fixed bottom-4 right-4 z-[9999] flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-110 active:scale-95"
+        className="fixed bottom-12 right-6 z-[9999] flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-110 active:scale-95"
         title="Open color customizer"
       >
-        <Icon d={ICON_PATHS.palette} className="h-4 w-4" />
+        <Icon d={ICON_PATHS.palette} className="h-6 w-6" />
       </button>
     );
   }
 
   return (
-    <div className="fixed bottom-4 right-4 z-[9999] w-64 rounded-xl border border-border bg-popover p-4 shadow-2xl">
+    <div className="fixed bottom-8 right-8 z-[9999] w-64 rounded-xl border border-border bg-popover p-4 shadow-2xl">
       <div className="mb-4 flex items-center justify-between">
         <span className="text-sm font-semibold text-popover-foreground">Colors</span>
         <button
