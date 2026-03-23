@@ -10,6 +10,7 @@ export function getSocket(): Socket {
     socket = io(SOCKET_URL, {
       autoConnect: false,
       withCredentials: true,
+      transports: ['websocket'],
       auth: (callback) => {
         callback({ token: getAccessToken() });
       },
