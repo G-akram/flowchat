@@ -16,6 +16,8 @@ interface MessageListProps {
   onHighlightComplete?: (() => void) | undefined;
   isDm?: boolean | undefined;
   currentUserId?: string | undefined;
+  onEditSave?: ((messageId: string, content: string) => void) | undefined;
+  onDelete?: ((messageId: string) => void) | undefined;
 }
 
 const SCROLL_THRESHOLD = 150;
@@ -42,6 +44,8 @@ export function MessageList({
   onHighlightComplete,
   isDm = false,
   currentUserId,
+  onEditSave,
+  onDelete,
 }: MessageListProps): React.JSX.Element {
   const queryClient = useQueryClient();
   const {
@@ -218,6 +222,8 @@ export function MessageList({
                 isHighlighted={activeHighlight === message.id}
                 isDm={isDm}
                 currentUserId={currentUserId}
+                onEditSave={onEditSave}
+                onDelete={onDelete}
               />
             );
           })}

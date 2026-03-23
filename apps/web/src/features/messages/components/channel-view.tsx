@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useQueryClient, type InfiniteData } from '@tanstack/react-query';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useChannelSocket } from '@/hooks/use-channel-socket';
@@ -6,11 +6,14 @@ import { useAuthStore } from '@/stores/auth-store';
 import { useOpenDm } from '@/features/dm/api/use-open-dm';
 import { useChannels } from '@/features/channels/api/use-channels';
 import { useWorkspaces } from '@/features/workspaces/api/use-workspaces';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 import { ChannelHeaderMenu } from './channel-header-menu';
 import { MessageList } from './message-list';
 import { MessageInput } from './message-input';
 import { TypingIndicator } from './typing-indicator';
 import { useSendMessage } from '../api/use-send-message';
+import { useEditMessage } from '../api/use-edit-message';
+import { useDeleteMessage } from '../api/use-delete-message';
 import { useToggleReaction } from '../api/use-toggle-reaction';
 import { messagesQueryKey } from '../api/use-messages';
 import type { MessageWithUser } from '../types';
@@ -33,6 +36,8 @@ function generateTempId(): string {
 export function ChannelView({ channelId, channelName, isDm = false }: ChannelViewProps): React.JSX.Element {
   const { typingUsers, newMessageFlag, clearNewMessageFlag } = useChannelSocket(channelId);
   const { mutate: sendMessage } = useSendMessage();
+  const { mutate: editMessage } = useEditMessage();
+  const { mutate: deleteMessage, isPending: isDeleting } = useDeleteMessage();
   const { mutate: toggleReaction } = useToggleReaction();
   const queryClient = useQueryClient();
   const { workspaceId } = useParams<{ workspaceId: string }>();
@@ -41,6 +46,7 @@ export function ChannelView({ channelId, channelName, isDm = false }: ChannelVie
   const { mutateAsync: openDm } = useOpenDm();
   const [searchParams, setSearchParams] = useSearchParams();
   const highlightMessageId = searchParams.get('highlight') ?? undefined;
+  const [deletingMessageId, setDeletingMessageId] = useState<string | null>(null);
 
   const { channels } = useChannels(workspaceId);
   const { workspaces } = useWorkspaces();
@@ -97,6 +103,25 @@ export function ChannelView({ channelId, channelName, isDm = false }: ChannelVie
     [channelId, toggleReaction]
   );
 
+  const handleEditSave = useCallback(
+    (messageId: string, content: string): void => {
+      editMessage({ channelId, messageId, content });
+    },
+    [channelId, editMessage]
+  );
+
+  const handleDeleteRequest = useCallback((messageId: string): void => {
+    setDeletingMessageId(messageId);
+  }, []);
+
+  const handleDeleteConfirm = useCallback((): void => {
+    if (!deletingMessageId) return;
+    deleteMessage(
+      { channelId, messageId: deletingMessageId },
+      { onSettled: () => setDeletingMessageId(null) }
+    );
+  }, [channelId, deletingMessageId, deleteMessage]);
+
   const handleUserClick = useCallback(
     async (userId: string): Promise<void> => {
       if (!workspaceId || !currentUser || userId === currentUser.id) return;
@@ -147,11 +172,23 @@ export function ChannelView({ channelId, channelName, isDm = false }: ChannelVie
         }}
         isDm={isDm}
         currentUserId={currentUser?.id}
+        onEditSave={handleEditSave}
+        onDelete={handleDeleteRequest}
       />
 
       <TypingIndicator typingUsers={typingUsers} />
 
       <MessageInput channelId={channelId} />
+
+      <ConfirmDialog
+        open={deletingMessageId !== null}
+        title="Delete message"
+        message="This message will be permanently deleted and cannot be recovered."
+        confirmLabel="Delete"
+        isLoading={isDeleting}
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeletingMessageId(null)}
+      />
     </div>
   );
 }

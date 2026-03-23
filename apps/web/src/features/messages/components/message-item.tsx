@@ -6,6 +6,8 @@ import { isOptimisticMessage } from '../types';
 import { ReactionBar } from './reaction-bar';
 import { EmojiPicker } from './emoji-picker';
 import { MessageAttachments } from '@/features/uploads/components/message-attachments';
+import { MessageActionBar } from './message-action-bar';
+import { InlineEditForm } from './inline-edit-form';
 
 interface MessageItemProps {
   message: DisplayMessage;
@@ -17,6 +19,8 @@ interface MessageItemProps {
   isHighlighted?: boolean | undefined;
   isDm?: boolean | undefined;
   currentUserId?: string | undefined;
+  onEditSave?: ((messageId: string, content: string) => void) | undefined;
+  onDelete?: ((messageId: string) => void) | undefined;
 }
 
 function formatTime(dateString: string): string {
@@ -34,12 +38,17 @@ export const MessageItem = React.memo(function MessageItem({
   isHighlighted = false,
   isDm = false,
   currentUserId,
+  onEditSave,
+  onDelete,
 }: MessageItemProps): React.JSX.Element {
   const isFailed = isOptimisticMessage(message) && message.status === 'failed';
   const isSending = isOptimisticMessage(message) && message.status === 'sending';
   const isOptimistic = isOptimisticMessage(message);
   const isSelf = isDm && message.user.id === currentUserId;
+  const canEdit = !isOptimistic && message.user.id === currentUserId;
+
   const [showPicker, setShowPicker] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   const reactions = useMemo(() => message.reactions ?? [], [message.reactions]);
   const hasReactions = reactions.length > 0;
@@ -59,50 +68,49 @@ export const MessageItem = React.memo(function MessageItem({
     [message.id, reactions, onToggleReaction]
   );
 
+  const handleEditSave = useCallback(
+    (content: string): void => {
+      onEditSave?.(message.id, content);
+      setIsEditing(false);
+    },
+    [message.id, onEditSave]
+  );
+
+  const handleDeleteClick = useCallback((): void => {
+    onDelete?.(message.id);
+  }, [message.id, onDelete]);
+
   const highlightClass = isHighlighted ? 'bg-yellow-500/15 transition-colors duration-1000' : '';
 
+  const sharedProps: InternalProps = {
+    message,
+    isCompact,
+    isSending,
+    isFailed,
+    isOptimistic,
+    highlightClass,
+    reactions,
+    hasReactions,
+    canEdit,
+    isEditing,
+    showPicker,
+    onSetShowPicker: setShowPicker,
+    onUserClick,
+    onToggle: handleToggle,
+    onPickerSelect: handlePickerSelect,
+    onEditStart: () => setIsEditing(true),
+    onEditSave: handleEditSave,
+    onEditCancel: () => setIsEditing(false),
+    onDeleteClick: handleDeleteClick,
+    onRetry,
+    onRemoveFailed,
+  };
+
   if (isDm) {
-    return (
-      <DmMessageItem
-        message={message}
-        isCompact={isCompact}
-        isSelf={isSelf}
-        isSending={isSending}
-        isFailed={isFailed}
-        isOptimistic={isOptimistic}
-        highlightClass={highlightClass}
-        reactions={reactions}
-        hasReactions={hasReactions}
-        showPicker={showPicker}
-        onSetShowPicker={setShowPicker}
-        onUserClick={onUserClick}
-        onToggle={handleToggle}
-        onPickerSelect={handlePickerSelect}
-        onRetry={onRetry}
-        onRemoveFailed={onRemoveFailed}
-      />
-    );
+    return <DmMessageItem {...sharedProps} isSelf={isSelf} />;
   }
 
-  return (
-    <ChannelMessageItem
-      message={message}
-      isCompact={isCompact}
-      isSending={isSending}
-      isFailed={isFailed}
-      isOptimistic={isOptimistic}
-      highlightClass={highlightClass}
-      reactions={reactions}
-      hasReactions={hasReactions}
-      showPicker={showPicker}
-      onSetShowPicker={setShowPicker}
-      onUserClick={onUserClick}
-      onToggle={handleToggle}
-      onPickerSelect={handlePickerSelect}
-      onRetry={onRetry}
-      onRemoveFailed={onRemoveFailed}
-    />
-  );
+  return <ChannelMessageItem {...sharedProps} />;
 });
 
 MessageItem.displayName = 'MessageItem';
@@ -116,11 +124,17 @@ interface InternalProps {
   highlightClass: string;
   reactions: ReactionData[];
   hasReactions: boolean;
+  canEdit: boolean;
+  isEditing: boolean;
   showPicker: boolean;
   onSetShowPicker: React.Dispatch<React.SetStateAction<boolean>>;
   onUserClick?: ((userId: string) => void) | undefined;
   onToggle: (emoji: string, hasReacted: boolean) => void;
   onPickerSelect: (emoji: string) => void;
+  onEditStart: () => void;
+  onEditSave: (content: string) => void;
+  onEditCancel: () => void;
+  onDeleteClick: () => void;
   onRetry: ((tempId: string, content: string) => void) | undefined;
   onRemoveFailed: ((tempId: string) => void) | undefined;
 }
@@ -138,27 +152,32 @@ function ChannelMessageItem({
   highlightClass,
   reactions,
   hasReactions,
+  canEdit,
+  isEditing,
   showPicker,
   onSetShowPicker,
   onUserClick,
   onToggle,
   onPickerSelect,
+  onEditStart,
+  onEditSave,
+  onEditCancel,
+  onDeleteClick,
   onRetry,
   onRemoveFailed,
 }: InternalProps): React.JSX.Element {
-  const addButton = !isOptimistic && (
-    <button
-      type="button"
-      className="invisible absolute -top-3 right-0 z-10 inline-flex h-6 items-center gap-1 rounded border border-border bg-popover px-1.5 text-xs text-muted-foreground shadow-sm transition-colors hover:border-border hover:text-foreground group-hover/msg:visible"
-      onClick={() => onSetShowPicker((prev) => !prev)}
-    >
-      <span className="text-sm leading-none">😀</span>
-      <span className="leading-none">+</span>
-    </button>
+  const actionBar = !isOptimistic && !isEditing && (
+    <MessageActionBar
+      canEdit={canEdit}
+      alignLeft={false}
+      onReactionClick={() => onSetShowPicker((p) => !p)}
+      onEditClick={onEditStart}
+      onDeleteClick={onDeleteClick}
+    />
   );
 
   const picker = showPicker && (
-    <EmojiPicker onSelect={onPickerSelect} onClose={() => onSetShowPicker(() => false)} />
+    <EmojiPicker onSelect={onPickerSelect} onClose={() => onSetShowPicker(false)} />
   );
 
   if (isCompact) {
@@ -173,12 +192,20 @@ function ChannelMessageItem({
           </span>
         </div>
         <div className="relative min-w-0 flex-1">
-          {addButton}
+          {actionBar}
           {picker}
-          <p className={`text-sm text-foreground break-words ${isSending ? 'opacity-50' : ''}`}>
-            {message.content}
-          </p>
-          {message.attachments && message.attachments.length > 0 && (
+          {isEditing ? (
+            <InlineEditForm
+              initialContent={message.content}
+              onSave={onEditSave}
+              onCancel={onEditCancel}
+            />
+          ) : (
+            <p className={`text-sm text-foreground break-words ${isSending ? 'opacity-50' : ''}`}>
+              {message.content}
+            </p>
+          )}
+          {!isEditing && message.attachments && message.attachments.length > 0 && (
             <MessageAttachments attachments={message.attachments} />
           )}
           {isFailed && (
@@ -213,19 +240,27 @@ function ChannelMessageItem({
       </button>
 
       <div className="relative min-w-0 flex-1">
-        {addButton}
+        {actionBar}
         {picker}
         <div className="flex items-baseline gap-2">
           <span className="text-sm font-semibold text-foreground">{message.user.displayName}</span>
           <span className="text-xs text-muted-foreground">{formatTime(message.createdAt)}</span>
-          {message.editedAt && (
+          {message.editedAt && !isEditing && (
             <span className="text-xs text-muted-foreground">(edited)</span>
           )}
         </div>
-        <p className={`text-sm text-foreground break-words ${isSending ? 'opacity-50' : ''}`}>
-          {message.content}
-        </p>
-        {message.attachments && message.attachments.length > 0 && (
+        {isEditing ? (
+          <InlineEditForm
+            initialContent={message.content}
+            onSave={onEditSave}
+            onCancel={onEditCancel}
+          />
+        ) : (
+          <p className={`text-sm text-foreground break-words ${isSending ? 'opacity-50' : ''}`}>
+            {message.content}
+          </p>
+        )}
+        {!isEditing && message.attachments && message.attachments.length > 0 && (
           <MessageAttachments attachments={message.attachments} />
         )}
         {isFailed && (
@@ -252,29 +287,34 @@ function DmMessageItem({
   highlightClass,
   reactions,
   hasReactions,
+  canEdit,
+  isEditing,
   showPicker,
   onSetShowPicker,
   onUserClick,
   onToggle,
   onPickerSelect,
+  onEditStart,
+  onEditSave,
+  onEditCancel,
+  onDeleteClick,
   onRetry,
   onRemoveFailed,
 }: DmInternalProps): React.JSX.Element {
-  const addButton = !isOptimistic && (
-    <button
-      type="button"
-      className={`invisible absolute -top-3 z-10 inline-flex h-6 items-center gap-1 rounded border border-border bg-popover px-1.5 text-xs text-muted-foreground shadow-sm transition-colors hover:border-border hover:text-foreground group-hover/msg:visible ${isSelf ? 'left-0' : 'right-0'}`}
-      onClick={() => onSetShowPicker((prev) => !prev)}
-    >
-      <span className="text-sm leading-none">😀</span>
-      <span className="leading-none">+</span>
-    </button>
+  const actionBar = !isOptimistic && !isEditing && (
+    <MessageActionBar
+      canEdit={canEdit}
+      alignLeft={isSelf}
+      onReactionClick={() => onSetShowPicker((p) => !p)}
+      onEditClick={onEditStart}
+      onDeleteClick={onDeleteClick}
+    />
   );
 
   const picker = showPicker && (
     <EmojiPicker
       onSelect={onPickerSelect}
-      onClose={() => onSetShowPicker(() => false)}
+      onClose={() => onSetShowPicker(false)}
       alignLeft={isSelf}
     />
   );
@@ -287,9 +327,7 @@ function DmMessageItem({
     ? `text-sm text-primary-foreground break-words ${isSending ? 'opacity-60' : ''}`
     : `text-sm text-foreground break-words ${isSending ? 'opacity-50' : ''}`;
 
-  const rowClass = isSelf
-    ? 'flex-row-reverse'
-    : 'flex-row';
+  const rowClass = isSelf ? 'flex-row-reverse' : 'flex-row';
 
   if (isCompact) {
     return (
@@ -299,11 +337,19 @@ function DmMessageItem({
       >
         <div className="w-8 shrink-0" />
         <div className="relative min-w-0 max-w-[75%]">
-          {addButton}
+          {actionBar}
           {picker}
           <div className={bubbleClass}>
-            <p className={textClass}>{message.content}</p>
-            {message.attachments && message.attachments.length > 0 && (
+            {isEditing ? (
+              <InlineEditForm
+                initialContent={message.content}
+                onSave={onEditSave}
+                onCancel={onEditCancel}
+              />
+            ) : (
+              <p className={textClass}>{message.content}</p>
+            )}
+            {!isEditing && message.attachments && message.attachments.length > 0 && (
               <MessageAttachments attachments={message.attachments} />
             )}
             {isFailed && (
@@ -339,20 +385,28 @@ function DmMessageItem({
       </button>
 
       <div className="relative min-w-0 max-w-[75%]">
-        {addButton}
+        {actionBar}
         {picker}
         <div className={`flex items-baseline gap-2 mb-0.5 ${isSelf ? 'justify-end' : ''}`}>
           {!isSelf && (
             <span className="text-sm font-semibold text-foreground">{message.user.displayName}</span>
           )}
           <span className="text-xs text-muted-foreground">{formatTime(message.createdAt)}</span>
-          {message.editedAt && (
+          {message.editedAt && !isEditing && (
             <span className="text-xs text-muted-foreground">(edited)</span>
           )}
         </div>
         <div className={bubbleClass}>
-          <p className={textClass}>{message.content}</p>
-          {message.attachments && message.attachments.length > 0 && (
+          {isEditing ? (
+            <InlineEditForm
+              initialContent={message.content}
+              onSave={onEditSave}
+              onCancel={onEditCancel}
+            />
+          ) : (
+            <p className={textClass}>{message.content}</p>
+          )}
+          {!isEditing && message.attachments && message.attachments.length > 0 && (
             <MessageAttachments attachments={message.attachments} />
           )}
           {isFailed && (
