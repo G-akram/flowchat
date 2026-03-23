@@ -171,6 +171,50 @@ export async function findNextChannelOwner(
   return result[0] ? { userId: result[0].userId } : undefined;
 }
 
+export async function markChannelRead(channelId: string, userId: string): Promise<void> {
+  await db
+    .update(channelMembers)
+    .set({ lastReadAt: new Date() })
+    .where(
+      and(
+        eq(channelMembers.channelId, channelId),
+        eq(channelMembers.userId, userId)
+      )
+    );
+}
+
+export interface UnreadCount {
+  channelId: string;
+  unreadCount: number;
+}
+
+export async function getUnreadCountsForUser(
+  userId: string,
+  workspaceId: string
+): Promise<UnreadCount[]> {
+  const result = await db.execute(sql`
+    SELECT
+      cm.channel_id AS "channelId",
+      COUNT(m.id)::int AS "unreadCount"
+    FROM channel_members cm
+    INNER JOIN channels c ON c.id = cm.channel_id
+    LEFT JOIN messages m ON
+      m.channel_id = cm.channel_id
+      AND m.user_id != ${userId}::uuid
+      AND cm.last_read_at IS NOT NULL
+      AND m.created_at > cm.last_read_at
+    WHERE
+      cm.user_id = ${userId}::uuid
+      AND c.workspace_id = ${workspaceId}::uuid
+    GROUP BY cm.channel_id
+  `);
+
+  return (result.rows as Array<{ channelId: string; unreadCount: number }>).map((row) => ({
+    channelId: row.channelId,
+    unreadCount: row.unreadCount,
+  }));
+}
+
 export async function updateChannelCreator(
   channelId: string,
   newCreatorId: string

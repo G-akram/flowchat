@@ -13,6 +13,7 @@ export const SOCKET_EVENTS = {
   CHANNEL_UPDATED: 'channel:updated',
   CHANNEL_DELETED: 'channel:deleted',
   NOTIFICATION_NEW: 'notification:new',
+  UNREAD_UPDATED: 'channel:unread_updated',
 } as const;
 
 export const MESSAGES_QUERY_KEY = 'messages';

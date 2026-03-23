@@ -7,6 +7,8 @@ import { useChannels } from '@/features/channels/api/use-channels';
 import { useDirectMessages } from '@/features/dm/api/use-direct-messages';
 import { useNotifications } from '@/features/notifications/api/use-notifications';
 import { NotificationPanel } from '@/features/notifications/components/notification-panel';
+import { useUnreadCounts } from '@/features/channels/api/use-unread-counts';
+import { useUnreadStore } from '@/stores/unread-store';
 import { Button } from '@flowchat/ui';
 import { PresenceDot } from '@/components/presence-dot';
 import { useUiStore } from '@/stores/ui-store';
@@ -45,6 +47,8 @@ export function Sidebar(): React.JSX.Element {
   const { channels, isLoading: isLoadingChannels } = useChannels(workspaceId);
   const { dms, isLoading: isLoadingDms } = useDirectMessages(workspaceId);
   const { unreadCount } = useNotifications();
+  const dmUnreadCounts = useUnreadStore((s) => s.counts);
+  useUnreadCounts(workspaceId);
   const [isWsMenuOpen, setIsWsMenuOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const wsMenuRef = useRef<HTMLDivElement>(null);
@@ -167,6 +171,8 @@ export function Sidebar(): React.JSX.Element {
           <nav className="mt-2 space-y-0.5">
             {dms.map((dm) => {
               const isActive = dm.id === channelId;
+              const dmUnread = dmUnreadCounts[dm.id] ?? 0;
+              const hasDmUnread = !isActive && dmUnread > 0;
               return (
                 <Link
                   key={dm.id}
@@ -174,11 +180,18 @@ export function Sidebar(): React.JSX.Element {
                   className={`flex items-center gap-2 rounded px-2 py-1.5 text-sm ${
                     isActive
                       ? 'bg-sidebar-accent font-medium text-sidebar-accent-foreground'
-                      : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
+                      : hasDmUnread
+                        ? 'font-semibold text-sidebar-foreground hover:bg-sidebar-accent/50'
+                        : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
                   }`}
                 >
                   <PresenceDot userId={dm.otherUser.id} size="sm" />
-                  <span className="truncate">{dm.otherUser.displayName}</span>
+                  <span className="min-w-0 flex-1 truncate">{dm.otherUser.displayName}</span>
+                  {hasDmUnread && (
+                    <span className="flex h-4 min-w-4 shrink-0 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-destructive-foreground">
+                      {dmUnread > 99 ? '99+' : dmUnread}
+                    </span>
+                  )}
                 </Link>
               );
             })}

@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { useQueryClient, type InfiniteData } from '@tanstack/react-query';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useChannelSocket } from '@/hooks/use-channel-socket';
@@ -16,6 +16,8 @@ import { useEditMessage } from '../api/use-edit-message';
 import { useDeleteMessage } from '../api/use-delete-message';
 import { useToggleReaction } from '../api/use-toggle-reaction';
 import { messagesQueryKey } from '../api/use-messages';
+import { useMarkChannelRead } from '@/features/channels/api/use-mark-channel-read';
+import { useUnreadStore } from '@/stores/unread-store';
 import type { MessageWithUser } from '../types';
 
 interface MessagesPage {
@@ -39,6 +41,8 @@ export function ChannelView({ channelId, channelName, isDm = false }: ChannelVie
   const { mutate: editMessage } = useEditMessage();
   const { mutate: deleteMessage, isPending: isDeleting } = useDeleteMessage();
   const { mutate: toggleReaction } = useToggleReaction();
+  const { mutate: markChannelRead } = useMarkChannelRead();
+  const clearUnread = useUnreadStore((s) => s.clearUnread);
   const queryClient = useQueryClient();
   const { workspaceId } = useParams<{ workspaceId: string }>();
   const navigate = useNavigate();
@@ -56,6 +60,12 @@ export function ChannelView({ channelId, channelName, isDm = false }: ChannelVie
   const isChannelCreator = channel?.createdById === currentUser?.id;
   const canManage = isOwnerOrAdmin || isChannelCreator;
   const isGeneral = channel?.name === 'general';
+
+  useEffect(() => {
+    if (!workspaceId) return;
+    markChannelRead({ workspaceId, channelId });
+    clearUnread(channelId);
+  }, [channelId, workspaceId, markChannelRead, clearUnread]);
 
   const handleRetry = useCallback(
     (failedTempId: string, content: string): void => {

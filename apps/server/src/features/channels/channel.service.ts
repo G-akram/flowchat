@@ -13,7 +13,10 @@ import {
   findChannelMemberProfiles,
   findNextChannelOwner,
   updateChannelCreator,
+  markChannelRead as markChannelReadInDb,
+  getUnreadCountsForUser,
   type ChannelMemberProfile,
+  type UnreadCount,
 } from './channel.repository';
 import type { DbChannel } from '../../db/schema/channels';
 
@@ -288,6 +291,24 @@ export async function listMembers(
   }
 
   return findChannelMemberProfiles(channelId, workspaceId);
+}
+
+export async function markRead(channelId: string, userId: string): Promise<void> {
+  const member = await findChannelMember(channelId, userId);
+
+  if (!member) {
+    throw new AppError('NOT_A_MEMBER', 'You are not a member of this channel', 403);
+  }
+
+  await markChannelReadInDb(channelId, userId);
+}
+
+export async function getUnreadCounts(
+  workspaceId: string,
+  userId: string
+): Promise<UnreadCount[]> {
+  await ensureWorkspaceMember(workspaceId, userId);
+  return getUnreadCountsForUser(userId, workspaceId);
 }
 
 export async function kickMember(

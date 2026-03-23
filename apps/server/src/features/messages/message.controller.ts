@@ -7,8 +7,10 @@ import type {
   ListMessagesQuery,
 } from './message.schemas';
 import { create, list, update, remove } from './message.service';
+import { findChannelMemberUserIds } from './message.repository';
 import { AppError } from '../../lib/errors';
 import { getIO } from '../../socket/socket.server';
+import { emitToUser } from '../../socket/emit-to-user';
 import { SOCKET_EVENTS } from '../../socket/events';
 
 export async function listMessagesHandler(
@@ -53,6 +55,13 @@ export async function createMessageHandler(
     const message = await create(req.params.channelId, req.body, user.id);
 
     getIO().to(`channel:${req.params.channelId}`).emit(SOCKET_EVENTS.MESSAGE_NEW, message);
+
+    const memberIds = await findChannelMemberUserIds(req.params.channelId);
+    for (const memberId of memberIds) {
+      if (memberId !== user.id) {
+        emitToUser(memberId, SOCKET_EVENTS.UNREAD_UPDATED, { channelId: req.params.channelId });
+      }
+    }
 
     res.status(201).json({ data: { message } });
   } catch (err) {

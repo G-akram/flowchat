@@ -20,6 +20,8 @@ import {
   addChannelMemberHandler,
   listChannelMembersHandler,
   kickChannelMemberHandler,
+  markChannelReadHandler,
+  getUnreadCountsHandler,
 } from './channel.controller';
 
 const router: ExpressRouter = Router({ mergeParams: true });
@@ -75,6 +77,16 @@ router.delete(
   '/:channelId/members/:userId',
   validate({ params: channelMemberParamsSchema }),
   kickChannelMemberHandler
+);
+router.post(
+  '/:channelId/read',
+  validate({ params: channelParamsSchema }),
+  markChannelReadHandler
+);
+router.get(
+  '/unread',
+  validate({ params: workspaceParamsSchema }),
+  getUnreadCountsHandler
 );
 
 export { router as channelRouter };

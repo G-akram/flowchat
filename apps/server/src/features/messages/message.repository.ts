@@ -150,6 +150,15 @@ export async function deleteMessage(id: string): Promise<void> {
   await db.delete(messages).where(eq(messages.id, id));
 }
 
+export async function findChannelMemberUserIds(channelId: string): Promise<string[]> {
+  const result = await db
+    .select({ userId: channelMembers.userId })
+    .from(channelMembers)
+    .where(eq(channelMembers.channelId, channelId));
+
+  return result.map((r) => r.userId);
+}
+
 export async function findChannelMember(
   channelId: string,
   userId: string

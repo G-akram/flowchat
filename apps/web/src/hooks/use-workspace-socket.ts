@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { useParams } from 'react-router-dom';
 import { getSocket, connectSocket } from '@/lib/socket';
 import { useAuthStore } from '@/stores/auth-store';
 import { SOCKET_EVENTS } from '@/features/messages/constants';
@@ -10,6 +11,7 @@ import {
   notifyWorkspaceRemoved,
 } from '@/lib/notifications';
 import { NOTIFICATIONS_QUERY_KEY } from '@/features/notifications/api/use-notifications';
+import { useUnreadStore } from '@/stores/unread-store';
 
 interface WorkspaceMemberPayload {
   workspaceId: string;
@@ -39,9 +41,15 @@ interface ChannelUpdatedPayload {
   };
 }
 
+interface UnreadUpdatedPayload {
+  channelId: string;
+}
+
 export function useWorkspaceSocket(workspaceId: string | undefined): void {
   const queryClient = useQueryClient();
   const currentUserId = useAuthStore((s) => s.user?.id);
+  const { channelId: currentChannelId } = useParams<{ channelId: string }>();
+  const incrementUnread = useUnreadStore((s) => s.incrementUnread);
 
   useEffect(() => {
     if (!workspaceId) return;
@@ -123,7 +131,13 @@ export function useWorkspaceSocket(workspaceId: string | undefined): void {
       void queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_QUERY_KEY });
     }
 
+    function handleUnreadUpdated(payload: UnreadUpdatedPayload): void {
+      if (payload.channelId === currentChannelId) return;
+      incrementUnread(payload.channelId);
+    }
+
     socket.on(SOCKET_EVENTS.NOTIFICATION_NEW, handleNotificationNew);
+    socket.on(SOCKET_EVENTS.UNREAD_UPDATED, handleUnreadUpdated);
     socket.on(SOCKET_EVENTS.WORKSPACE_MEMBER_ADDED, handleWorkspaceMemberAdded);
     socket.on(SOCKET_EVENTS.WORKSPACE_MEMBER_REMOVED, handleWorkspaceMemberRemoved);
     socket.on(SOCKET_EVENTS.CHANNEL_MEMBER_ADDED, handleChannelMemberAdded);
@@ -132,6 +146,7 @@ export function useWorkspaceSocket(workspaceId: string | undefined): void {
     socket.on(SOCKET_EVENTS.CHANNEL_DELETED, handleChannelDeleted);
 
     return (): void => {
+      socket.off(SOCKET_EVENTS.UNREAD_UPDATED, handleUnreadUpdated);
       socket.off(SOCKET_EVENTS.NOTIFICATION_NEW, handleNotificationNew);
       socket.off(SOCKET_EVENTS.WORKSPACE_MEMBER_ADDED, handleWorkspaceMemberAdded);
       socket.off(SOCKET_EVENTS.WORKSPACE_MEMBER_REMOVED, handleWorkspaceMemberRemoved);
@@ -140,5 +155,5 @@ export function useWorkspaceSocket(workspaceId: string | undefined): void {
       socket.off(SOCKET_EVENTS.CHANNEL_UPDATED, handleChannelUpdated);
       socket.off(SOCKET_EVENTS.CHANNEL_DELETED, handleChannelDeleted);
     };
-  }, [workspaceId, currentUserId, queryClient]);
+  }, [workspaceId, currentUserId, currentChannelId, incrementUnread, queryClient]);
 }

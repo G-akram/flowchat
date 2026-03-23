@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from 'express';
 import type { CreateChannelInput, UpdateChannelInput, AddChannelMemberInput, ChannelParams, ChannelMemberParams, WorkspaceParams } from './channel.schemas';
-import { create, listByWorkspace, join, getById, update, remove, leave, addMember, listMembers, kickMember } from './channel.service';
+import { create, listByWorkspace, join, getById, update, remove, leave, addMember, listMembers, kickMember, markRead, getUnreadCounts } from './channel.service';
 import { findChannelById } from './channel.repository';
 import { create as createNotification } from '../notifications/notification.service';
 import { AppError } from '../../lib/errors';
@@ -228,6 +228,46 @@ export async function listChannelMembersHandler(
     const members = await listMembers(req.params.workspaceId, req.params.channelId, user.id);
 
     res.status(200).json({ data: { members } });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function markChannelReadHandler(
+  req: Request<ChannelParams>,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const user = req.user;
+
+    if (!user) {
+      throw new AppError('UNAUTHORIZED', 'Not authenticated', 401);
+    }
+
+    await markRead(req.params.channelId, user.id);
+
+    res.status(204).send();
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function getUnreadCountsHandler(
+  req: Request<WorkspaceParams>,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const user = req.user;
+
+    if (!user) {
+      throw new AppError('UNAUTHORIZED', 'Not authenticated', 401);
+    }
+
+    const unreadCounts = await getUnreadCounts(req.params.workspaceId, user.id);
+
+    res.status(200).json({ data: { unreadCounts } });
   } catch (err) {
     next(err);
   }
