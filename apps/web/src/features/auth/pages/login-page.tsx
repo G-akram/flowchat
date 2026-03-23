@@ -8,9 +8,18 @@ import type { ApiError } from '@flowchat/types';
 import { loginSchema, type LoginFormValues } from '../schemas';
 import { useLogin } from '../api/use-login';
 
+const DEMO_ACCOUNTS = [
+  { name: 'Alice', email: 'alice@flowchat.dev' },
+  { name: 'Bob', email: 'bob@flowchat.dev' },
+  { name: 'Charlie', email: 'charlie@flowchat.dev' },
+] as const;
+
+const DEMO_PASSWORD = 'password123';
+
 export function LoginPage(): React.JSX.Element {
   const navigate = useNavigate();
   const { mutate: login, isPending, error: mutationError } = useLogin();
+  const [demoLoadingEmail, setDemoLoadingEmail] = React.useState<string | null>(null);
 
   const {
     register,
@@ -35,6 +44,21 @@ export function LoginPage(): React.JSX.Element {
         }
       },
     });
+  }
+
+  function loginAsDemo(email: string): void {
+    setDemoLoadingEmail(email);
+    login(
+      { email, password: DEMO_PASSWORD },
+      {
+        onSuccess: () => {
+          void navigate('/app', { replace: true });
+        },
+        onSettled: () => {
+          setDemoLoadingEmail(null);
+        },
+      },
+    );
   }
 
   const serverError =
@@ -88,6 +112,26 @@ export function LoginPage(): React.JSX.Element {
               Sign in
             </Button>
           </form>
+        </div>
+
+        <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+          <p className="mb-3 text-center text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            Try a demo account
+          </p>
+          <div className="flex flex-col gap-2">
+            {DEMO_ACCOUNTS.map((account) => (
+              <Button
+                key={account.email}
+                variant="outline"
+                className="w-full text-foreground"
+                isLoading={demoLoadingEmail === account.email}
+                disabled={isPending || demoLoadingEmail !== null}
+                onClick={() => loginAsDemo(account.email)}
+              >
+                Login as {account.name}
+              </Button>
+            ))}
+          </div>
         </div>
 
         <p className="text-center text-sm text-muted-foreground">
