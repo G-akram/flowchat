@@ -207,5 +207,4 @@ See **[.github/CONTRIBUTING.md](.github/CONTRIBUTING.md)** for the code style gu
 ---
 
 ## License
-
-This project is a portfolio piece. All rights reserved.
+use it as u wish.
