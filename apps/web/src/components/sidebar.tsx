@@ -70,17 +70,17 @@ export function Sidebar(): React.JSX.Element {
   }, [isWsMenuOpen]);
 
   return (
-    <aside className="flex w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar">
-      <div className="relative flex h-12 items-center justify-between border-b border-sidebar-border px-4" ref={wsMenuRef}>
+    <aside className="flex w-64 shrink-0 flex-col border-r border-sidebar-border bg-sidebar">
+      <div className="relative flex h-14 items-center justify-between border-b border-sidebar-border px-3" ref={wsMenuRef}>
         <button
           type="button"
-          className="flex min-w-0 items-center gap-1 rounded px-1 py-0.5 hover:bg-sidebar-accent"
+          className="flex min-w-0 flex-1 items-center gap-1.5 rounded-md px-2 py-1.5 hover:bg-sidebar-accent/40"
           onClick={() => setIsWsMenuOpen((prev) => !prev)}
         >
-          <span className="truncate text-sm font-semibold text-sidebar-foreground">
+          <span className="truncate text-[15px] font-bold text-sidebar-foreground">
             {isLoadingWorkspaces ? 'Loading\u2026' : (activeWorkspace?.name ?? 'FlowChat')}
           </span>
-          <svg className="h-3.5 w-3.5 shrink-0 text-sidebar-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg className="h-3.5 w-3.5 shrink-0 text-sidebar-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
           </svg>
         </button>
@@ -88,7 +88,7 @@ export function Sidebar(): React.JSX.Element {
           <div className="relative">
             <button
               type="button"
-              className="flex h-7 w-7 items-center justify-center rounded text-sidebar-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground"
+              className="flex h-8 w-8 items-center justify-center rounded-md text-sidebar-muted-foreground hover:bg-sidebar-accent/40 hover:text-sidebar-foreground"
               title="Notifications"
               onClick={() => setIsNotifOpen((prev) => !prev)}
             >
@@ -105,7 +105,7 @@ export function Sidebar(): React.JSX.Element {
           </div>
           <button
             type="button"
-            className="flex h-7 w-7 items-center justify-center rounded text-sidebar-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground"
+            className="flex h-8 w-8 items-center justify-center rounded-md text-sidebar-muted-foreground hover:bg-sidebar-accent/40 hover:text-sidebar-foreground"
             title="Search messages (Ctrl+K)"
             onClick={() => openModal('search')}
           >
@@ -117,27 +117,29 @@ export function Sidebar(): React.JSX.Element {
         {isWsMenuOpen && <WorkspaceMenu onClose={() => setIsWsMenuOpen(false)} />}
       </div>
 
-      <div className="flex-1 overflow-y-auto p-3">
-        <div className="flex items-center justify-between">
-          <p className="text-xs font-medium uppercase tracking-wider text-sidebar-muted-foreground">
+      <div className="flex-1 overflow-y-auto py-3">
+        <div className="flex items-center justify-between px-4 pb-1">
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-sidebar-muted-foreground">
             Channels
           </p>
           <button
             type="button"
-            className="flex h-5 w-5 items-center justify-center rounded text-sidebar-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground"
+            className="flex h-5 w-5 items-center justify-center rounded text-sidebar-muted-foreground hover:bg-sidebar-accent/40 hover:text-sidebar-foreground"
             title="Create channel"
             onClick={() => openModal('createChannel')}
           >
-            <span className="text-sm leading-none">+</span>
+            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
           </button>
         </div>
 
         {isLoadingChannels ? (
-          <ChannelListSkeleton />
+          <div className="px-2"><ChannelListSkeleton /></div>
         ) : !channels || channels.length === 0 ? (
           <ChannelListEmpty />
         ) : (
-          <nav className="mt-2 space-y-0.5">
+          <nav className="mt-1 space-y-0.5 px-2">
             {channels.map((channel) => (
               <ChannelItem
                 key={channel.id}
@@ -149,26 +151,28 @@ export function Sidebar(): React.JSX.Element {
           </nav>
         )}
 
-        <div className="mt-4 flex items-center justify-between">
-          <p className="text-xs font-medium uppercase tracking-wider text-sidebar-muted-foreground">
+        <div className="mt-5 flex items-center justify-between px-4 pb-1">
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-sidebar-muted-foreground">
             Direct Messages
           </p>
           <button
             type="button"
-            className="flex h-5 w-5 items-center justify-center rounded text-sidebar-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground"
+            className="flex h-5 w-5 items-center justify-center rounded text-sidebar-muted-foreground hover:bg-sidebar-accent/40 hover:text-sidebar-foreground"
             title="New direct message"
             onClick={() => openModal('newDm')}
           >
-            <span className="text-sm leading-none">+</span>
+            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
           </button>
         </div>
 
         {isLoadingDms ? (
-          <ChannelListSkeleton />
+          <div className="px-2"><ChannelListSkeleton /></div>
         ) : !dms || dms.length === 0 ? (
-          <p className="mt-2 text-xs text-sidebar-muted-foreground">No conversations yet</p>
+          <p className="mt-1 px-4 text-xs text-sidebar-muted-foreground">No conversations yet</p>
         ) : (
-          <nav className="mt-2 space-y-0.5">
+          <nav className="mt-1 space-y-0.5 px-2">
             {dms.map((dm) => {
               const isActive = dm.id === channelId;
               const dmUnread = dmUnreadCounts[dm.id] ?? 0;
@@ -177,12 +181,12 @@ export function Sidebar(): React.JSX.Element {
                 <Link
                   key={dm.id}
                   to={`/app/${workspaceId}/${dm.id}`}
-                  className={`flex items-center gap-2 rounded px-2 py-1.5 text-sm ${
+                  className={`flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors ${
                     isActive
-                      ? 'bg-sidebar-accent font-medium text-sidebar-accent-foreground'
+                      ? 'bg-sidebar-accent font-semibold text-sidebar-accent-foreground'
                       : hasDmUnread
-                        ? 'font-semibold text-sidebar-foreground hover:bg-sidebar-accent/50'
-                        : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
+                        ? 'font-semibold text-sidebar-foreground hover:bg-sidebar-accent/30'
+                        : 'text-sidebar-foreground/65 hover:bg-sidebar-accent/30 hover:text-sidebar-foreground'
                   }`}
                 >
                   <PresenceDot userId={dm.otherUser.id} size="sm" />
@@ -199,25 +203,26 @@ export function Sidebar(): React.JSX.Element {
         )}
       </div>
 
-      <div className="border-t border-sidebar-border p-3">
-        <div className="flex items-center justify-between">
+      <div className="border-t border-sidebar-border px-3 py-3">
+        <div className="flex items-center justify-between gap-2">
           <button
             type="button"
-            className="flex min-w-0 items-center gap-2 rounded px-1 py-0.5 hover:bg-sidebar-accent"
+            className="flex min-w-0 flex-1 items-center gap-2 rounded-md px-2 py-1.5 hover:bg-sidebar-accent/40 transition-colors"
             onClick={() => openModal('editProfile')}
           >
             {user && <PresenceDot userId={user.id} size="sm" />}
-            <span className="truncate text-sm text-sidebar-foreground">
+            <span className="truncate text-sm font-medium text-sidebar-foreground">
               {user?.displayName}
             </span>
           </button>
-          <div className="flex items-center gap-0.5">
+          <div className="flex shrink-0 items-center gap-0.5">
             <ThemeToggle />
             <Button
               variant="ghost"
               size="sm"
               isLoading={isPending}
               onClick={() => logout()}
+              className="text-sidebar-muted-foreground hover:text-sidebar-foreground"
             >
               Sign out
             </Button>

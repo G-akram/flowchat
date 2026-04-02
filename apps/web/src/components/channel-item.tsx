@@ -21,16 +21,16 @@ export function ChannelItem({
     <div className="group relative">
       <Link
         to={`/app/${workspaceId}/${channel.id}`}
-        className={`flex items-center justify-between rounded px-2 py-1.5 text-sm ${
+        className={`flex items-center justify-between rounded-md px-2 py-1.5 text-sm transition-colors ${
           isActive
-            ? 'bg-sidebar-accent font-medium text-sidebar-accent-foreground'
+            ? 'bg-sidebar-accent font-semibold text-sidebar-accent-foreground'
             : hasUnread
-              ? 'font-semibold text-sidebar-foreground hover:bg-sidebar-accent/50'
-              : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
+              ? 'font-semibold text-sidebar-foreground hover:bg-sidebar-accent/30'
+              : 'text-sidebar-foreground/65 hover:bg-sidebar-accent/30 hover:text-sidebar-foreground'
         }`}
       >
         <span className="min-w-0 flex-1 truncate">
-          <span className="mr-1 text-sidebar-muted-foreground">#</span>
+          <span className={`mr-1 ${isActive ? 'text-sidebar-accent-foreground/70' : 'text-sidebar-muted-foreground'}`}>#</span>
           {channel.name}
         </span>
         <div className="flex shrink-0 items-center gap-1">

@@ -148,10 +148,10 @@ export function ChannelView({ channelId, channelName, isDm = false }: ChannelVie
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex h-12 shrink-0 items-center justify-between border-b border-border px-4">
+      <div className="flex h-14 shrink-0 items-center justify-between border-b border-border px-5">
         <div className="min-w-0">
-          <h2 className="truncate text-sm font-semibold text-foreground">
-            {isDm ? '' : '# '}{channelName ?? (isDm ? 'Direct Message' : 'channel')}
+          <h2 className="truncate text-[15px] font-bold text-foreground">
+            {isDm ? '' : <span className="mr-0.5 font-normal text-muted-foreground">#</span>}{channelName ?? (isDm ? 'Direct Message' : 'channel')}
           </h2>
           {!isDm && channel?.description && (
             <p className="truncate text-xs text-muted-foreground">{channel.description}</p>

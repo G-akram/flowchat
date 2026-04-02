@@ -146,69 +146,73 @@ export function MessageInput({ channelId }: MessageInputProps): React.JSX.Elemen
 
   return (
     <div
-      className={`border-t bg-background px-4 py-3 ${isDragOver ? 'border-primary bg-primary/5' : 'border-border'}`}
+      className="border-t border-border bg-background px-4 py-4"
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
-      <FilePreviewList uploads={pendingUploads} onRemove={removeFile} />
+      <div className={`relative rounded-xl border transition-colors ${isDragOver ? 'border-primary bg-primary/5' : 'border-input bg-background hover:border-ring/40'}`}>
+        {hasFiles && <FilePreviewList uploads={pendingUploads} onRemove={removeFile} />}
 
-      <div className="flex items-end gap-2">
-        <button
-          type="button"
-          className="mb-1.5 flex h-8 w-8 shrink-0 items-center justify-center rounded text-muted-foreground hover:bg-accent hover:text-foreground"
-          onClick={handlePaperclipClick}
-          title="Attach file"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+        <div className="flex items-end gap-2 px-2 py-2">
+          <button
+            type="button"
+            className="mb-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+            onClick={handlePaperclipClick}
+            title="Attach file"
           >
-            <path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48" />
-          </svg>
-        </button>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="17"
+              height="17"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+            </svg>
+          </button>
 
-        <input
-          ref={fileInputRef}
-          type="file"
-          multiple
-          className="hidden"
-          accept="image/*,application/pdf,text/*"
-          onChange={handleFileSelect}
-        />
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            className="hidden"
+            accept="image/*,application/pdf,text/*"
+            onChange={handleFileSelect}
+          />
 
-        <textarea
-          ref={textareaRef}
-          value={content}
-          onChange={handleChange}
-          onKeyDown={handleKeyDown}
-          onBlur={handleBlur}
-          placeholder={isDragOver ? 'Drop files here...' : 'Type a message...'}
-          rows={1}
-          className="flex-1 resize-none rounded-lg border border-input bg-background px-3 py-2 text-sm leading-5 text-foreground placeholder-muted-foreground outline-none focus:border-ring focus:ring-1 focus:ring-ring"
-          style={{ minHeight: `${LINE_HEIGHT + PADDING}px` }}
-        />
-        <Button
-          size="sm"
-          onClick={() => void handleSubmit()}
-          disabled={(!content.trim() && !hasFiles) || isUploading}
-        >
-          {isUploading ? 'Uploading...' : 'Send'}
-        </Button>
-      </div>
+          <textarea
+            ref={textareaRef}
+            value={content}
+            onChange={handleChange}
+            onKeyDown={handleKeyDown}
+            onBlur={handleBlur}
+            placeholder={isDragOver ? 'Drop files here...' : 'Type a message...'}
+            rows={1}
+            className="flex-1 resize-none bg-transparent px-1 py-1.5 text-sm leading-5 text-foreground placeholder:text-muted-foreground outline-none"
+            style={{ minHeight: `${LINE_HEIGHT + PADDING}px` }}
+          />
 
-      {isDragOver && (
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-lg border-2 border-dashed border-primary bg-primary/5">
-          <p className="text-sm font-medium text-primary">Drop files to upload</p>
+          <Button
+            size="sm"
+            onClick={() => void handleSubmit()}
+            disabled={(!content.trim() && !hasFiles) || isUploading}
+            className="mb-0.5 shrink-0"
+          >
+            {isUploading ? 'Uploading...' : 'Send'}
+          </Button>
         </div>
-      )}
+
+        {isDragOver && (
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-xl border-2 border-dashed border-primary bg-primary/5">
+            <p className="text-sm font-medium text-primary">Drop files to upload</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
