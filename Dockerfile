@@ -25,4 +25,4 @@ COPY --from=builder /app/apps/server ./apps/server
 
 WORKDIR /app/apps/server
 EXPOSE 4000
-CMD ["node", "apps/server/dist/server.js"]
+CMD ["node", "dist/server.js"]
